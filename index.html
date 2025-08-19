@@ -1,0 +1,3755 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Cyber Hygiene Dashboard</title>
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <!-- Chart.js for Skill Matrix -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        /* General Styles */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+        :root {
+            --primary-color: #0a3d62;
+            --secondary-color: #125d98;
+            --accent-color: #3498db;
+            --background-light: #f6f8fa;
+            --card-background-light: #ffffff;
+            --text-color-dark: #333;
+            --text-color-medium: #555;
+            --success-color: #2d862d;
+            --error-color: #e74c3c;
+            --border-color: #ddd;
+            --shadow-light: rgba(0,0,0,0.1);
+            --shadow-medium: rgba(0,0,0,0.05);
+            --gold-medal: #FFD700;
+            --silver-medal: #C0C0C0;
+            --bronze-medal: #CD7F32;
+        }
+
+        * {
+            box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
+        }
+
+        body {
+            background-color: var(--background-light);
+            padding: 0;
+            margin: 0;
+            color: var(--text-color-dark);
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+            font-size: 16px;
+            line-height: 1.6;
+            overflow-x: hidden; /* Prevent horizontal scroll */
+        }
+
+        h1, h2, h3 {
+            color: var(--primary-color);
+            margin-top: 0;
+            margin-bottom: 1rem;
+            font-weight: 700;
+        }
+
+        h1 {
+            font-size: 2.2rem;
+            text-align: center;
+            margin-bottom: 1.5rem;
+        }
+
+        h2 {
+            font-size: 1.8rem;
+            margin-bottom: 1.2rem;
+        }
+
+        h3 {
+            font-size: 1.4rem;
+            margin-bottom: 1rem;
+        }
+
+        p {
+            margin-bottom: 1rem;
+        }
+
+        /* Form Styles (Login & Checklist) */
+        form {
+            background: var(--card-background-light);
+            padding: 1.5rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px var(--shadow-light);
+            margin-bottom: 1.5rem;
+        }
+
+        label {
+            display: flex;
+            align-items: center;
+            margin-bottom: 1rem;
+            font-size: 1.1rem;
+            cursor: pointer;
+            color: var(--text-color-dark);
+        }
+
+        input[type="checkbox"], input[type="radio"] {
+            margin-right: 10px;
+            width: 20px;
+            height: 20px;
+            accent-color: var(--accent-color);
+            border-radius: 4px;
+        }
+
+        input[type="radio"] {
+            border-radius: 50%;
+        }
+
+        button {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 0.8rem 1.8rem;
+            font-size: 1.05rem;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.2s ease;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            font-weight: 600;
+        }
+
+        button:hover {
+            background-color: var(--secondary-color);
+            transform: translateY(-3px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.3);
+        }
+
+        button:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+
+        button.active {
+            background-color: var(--secondary-color);
+            font-weight: bold;
+            box-shadow: inset 0 2px 5px rgba(0,0,0,0.3);
+        }
+
+        /* Feedback Messages */
+        .feedback-message {
+            text-align: center;
+            margin-top: 1rem;
+            font-weight: bold;
+            font-size: 1.1rem;
+            padding: 0.5rem;
+            border-radius: 5px;
+            display: none;
+        }
+
+        /* Login Box Specific Styles */
+        .login-box {
+            max-width: 450px;
+            margin: 6rem auto;
+            padding: 2.5rem;
+            background-color: var(--card-background-light);
+            border-radius: 12px;
+            text-align: center;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+        }
+
+        .login-box h2 {
+            font-size: 2rem;
+            color: var(--primary-color);
+            margin-bottom: 1.5rem;
+        }
+
+        .login-box input {
+            width: 100%;
+            padding: 0.9rem;
+            margin: 0.7rem 0;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 1.05rem;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .login-box input:focus {
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
+            outline: none;
+        }
+
+        #strength-bar {
+            width: 100%;
+            height: 10px;
+            background: #eee;
+            margin-top: 8px;
+            border-radius: 5px;
+            overflow: hidden;
+        }
+
+        #strength-level {
+            height: 100%;
+            width: 0%;
+            background-color: red;
+            border-radius: 5px;
+            transition: width 0.3s ease-in-out, background-color 0.3s ease-in-out;
+        }
+
+        #strength-text {
+            display: block;
+            margin-top: 8px;
+            font-size: 0.95rem;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+        /* Dashboard Layout */
+        .container {
+            display: grid;
+            grid-template-columns: 280px 1fr;
+            gap: 2.5rem;
+            max-width: 1600px;
+            width: 100%;
+            margin: 2.5rem;
+            background-color: var(--card-background-light);
+            border-radius: 18px;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        /* Sidebar Styling */
+        .sidebar {
+            background: var(--primary-color);
+            color: white;
+            padding: 2rem 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            border-radius: 18px 0 0 18px;
+            box-shadow: inset -5px 0 15px rgba(0,0,0,0.1);
+        }
+
+        .sidebar-header {
+            padding: 0 1.5rem;
+            margin-bottom: 2.5rem;
+            text-align: center;
+        }
+
+        .user-profile {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .user-avatar {
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            border: 3px solid white;
+            object-fit: cover;
+            margin-bottom: 10px;
+            box-shadow: 0 0 0 3px var(--accent-color);
+        }
+
+        .user-name-display {
+            color: white;
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .user-points, .session-timer {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #FFD700; /* Gold color for points */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            margin-bottom: 0.5rem;
+        }
+
+        .user-points i, .session-timer i {
+            font-size: 1.3rem;
+        }
+
+
+        .main-nav ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .main-nav li {
+            margin-bottom: 8px;
+        }
+
+        .main-nav .nav-button {
+            display: flex;
+            align-items: center;
+            width: 100%;
+            padding: 1.1rem 1.8rem;
+            background-color: transparent;
+            border-radius: 0;
+            text-align: left;
+            color: white;
+            font-size: 1.15rem;
+            transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out;
+            box-shadow: none;
+            font-weight: 500;
+        }
+
+        .main-nav .nav-button i {
+            margin-right: 12px;
+            font-size: 1.3rem;
+        }
+
+        .main-nav .nav-button:hover {
+            background-color: var(--secondary-color);
+            color: white;
+            transform: none;
+        }
+
+        .main-nav .nav-button.active {
+            background-color: var(--secondary-color);
+            font-weight: bold;
+            box-shadow: none;
+            position: relative;
+            color: white;
+        }
+
+        .main-nav .nav-button.active::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 6px;
+            background-color: var(--accent-color);
+            border-radius: 0 6px 6px 0;
+        }
+
+        .logout-button {
+            margin-top: 2rem;
+            background-color: var(--error-color);
+        }
+
+        .logout-button:hover {
+            background-color: #c0392b;
+        }
+
+        .sidebar-footer {
+            padding: 1.5rem;
+            border-top: 1px solid rgba(255,255,255,0.15);
+            margin-top: 2.5rem;
+        }
+
+        .sidebar-footer h3 {
+            color: white;
+            margin-top: 0;
+        }
+
+        /* Main Dashboard Content Area */
+        .dashboard-content {
+            padding: 2.5rem;
+            background-color: var(--card-background-light);
+            border-radius: 0 18px 18px 0;
+            min-height: 80vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .dashboard-intro {
+            font-size: 1.15rem;
+            color: var(--text-color-medium);
+            margin-bottom: 2rem;
+        }
+
+        /* Tab Content Styling */
+        .tab-content {
+            display: none;
+            background: var(--card-background-light);
+            padding: 0;
+            border-radius: 12px;
+            box-shadow: none;
+        }
+
+        .tab-content.active-tab {
+            display: block;
+        }
+
+        /* Dashboard Overview Cards */
+        .summary-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-top: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .card {
+            background-color: #e0f2f7;
+            padding: 1.8rem;
+            border-radius: 12px;
+            box-shadow: 0 6px 15px rgba(0,0,0,0.08);
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.12);
+        }
+
+        .card h3 {
+            color: var(--primary-color);
+            margin-top: 0;
+            font-size: 1.3rem;
+        }
+
+        .card p {
+            font-size: 1.1rem;
+            color: var(--text-color-medium);
+            flex-grow: 1;
+            margin-bottom: 1.2rem;
+        }
+
+        .card button {
+            margin-top: 1rem;
+            width: fit-content;
+            align-self: center;
+        }
+
+        .daily-threat-alert {
+            background-color: #ffe0b2;
+            border-left: 6px solid #ff9800;
+            padding: 1.5rem;
+            border-radius: 12px;
+            margin-top: 2rem;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+        }
+
+        .daily-threat-alert h3 {
+            color: #e65100;
+            margin-bottom: 0.8rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .daily-threat-alert p {
+            color: #6d4c41;
+            font-size: 1.05rem;
+        }
+
+        .daily-threat-alert button {
+            background-color: #ff9800;
+            margin-top: 1rem;
+        }
+
+        .daily-threat-alert button:hover {
+            background-color: #fb8c00;
+        }
+
+        .tackled-categories {
+            margin-top: 3rem;
+            padding: 1.5rem;
+            background-color: #f0f2f7;
+            border-radius: 12px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+        }
+
+        .tackled-categories h2 {
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+
+        .category-badges {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 1.5rem;
+        }
+
+        .badge {
+            background-color: var(--accent-color);
+            color: white;
+            padding: 0.6em 1.2em;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            transition: transform 0.2s ease, background-color 0.2s ease;
+        }
+
+        .badge:hover {
+            transform: translateY(-2px);
+            background-color: var(--secondary-color);
+        }
+
+
+        /* Learning Modules */
+        .module-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 2rem;
+            margin-top: 1.5rem;
+        }
+
+        .module-card {
+            background-color: #f0f8ff;
+            padding: 1.8rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            position: relative;
+            overflow: hidden;
+            transition: transform 0.2s ease, box-shadow 0.2s ease, border 0.2s ease, filter 0.2s ease;
+        }
+
+        .module-card:hover:not(.locked) {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 15px rgba(0,0,0,0.1);
+        }
+
+        .module-card h3 {
+            color: var(--primary-color);
+            margin-top: 0;
+            font-size: 1.3rem;
+        }
+
+        .module-card p {
+            color: var(--text-color-medium);
+            flex-grow: 1;
+            margin-bottom: 1.5rem;
+            font-size: 1rem;
+        }
+
+        .module-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+        }
+
+        .module-card .start-module-btn {
+            padding: 0.7rem 1.4rem;
+            font-size: 0.95rem;
+        }
+
+        .module-card .module-status {
+            font-weight: bold;
+            color: var(--success-color);
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .module-card.locked {
+            filter: grayscale(80%) brightness(0.8);
+            pointer-events: none;
+        }
+
+        .lock-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0,0,0,0.6);
+            color: white;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            font-size: 1.8rem;
+            font-weight: bold;
+            border-radius: 12px;
+            z-index: 10;
+        }
+
+        .lock-overlay i {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+
+        .module-card.completed {
+            border: 2px solid var(--success-color);
+            box-shadow: 0 4px 15px rgba(45, 134, 45, 0.2);
+        }
+
+
+        /* Quizzes */
+        .quiz-selection, .ctf-selection {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            justify-content: center;
+        }
+
+        .quiz-select-btn {
+            background-color: var(--accent-color);
+            padding: 0.9rem 1.6rem;
+            font-size: 1.05rem;
+        }
+
+        .quiz-select-btn:hover {
+            background-color: #2980b9;
+        }
+
+        #quiz-area, #ctf-area {
+            background: var(--card-background-light);
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px var(--shadow-light);
+            margin-top: 1.5rem;
+        }
+
+        .quiz-progress-container {
+            width: 100%;
+            background-color: #eee;
+            height: 15px;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-bottom: 1.5rem;
+            position: relative;
+            box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        .quiz-progress-bar {
+            height: 100%;
+            width: 0%;
+            background-color: var(--accent-color);
+            border-radius: 10px;
+            transition: width 0.4s ease-out;
+        }
+
+        #quiz-progress-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: var(--primary-color);
+            font-weight: bold;
+            font-size: 0.9rem;
+            text-shadow: 0 0 2px rgba(255,255,255,0.7);
+        }
+
+        .quiz-question {
+            margin-bottom: 1.5rem;
+            padding: 1rem;
+            background-color: #f9f9f9;
+            border-radius: 8px;
+            border: 1px solid #eee;
+        }
+
+        .quiz-question p {
+            font-weight: 600;
+            font-size: 1.1rem;
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+        }
+
+        .quiz-answer-review {
+            background-color: #f0f8ff;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            border-left: 5px solid var(--primary-color);
+        }
+
+        .correct-answer {
+            color: var(--success-color);
+            font-weight: bold;
+        }
+
+        .incorrect-answer {
+            color: var(--error-color);
+            font-weight: bold;
+        }
+
+        .correct-answer-text {
+            color: var(--success-color);
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+
+        .incorrect-answer-text {
+            color: var(--error-color);
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+
+        /* CTF Challenges */
+        .ctf-select-btn {
+            background-color: #e67e22;
+            padding: 0.9rem 1.6rem;
+            font-size: 1.05rem;
+        }
+
+        .ctf-select-btn:hover {
+            background-color: #d35400;
+        }
+
+        #ctf-scenario-text {
+            background-color: #f0f4f7;
+            padding: 1.5rem;
+            border-left: 5px solid var(--primary-color);
+            border-radius: 8px;
+            margin-bottom: 1.5rem;
+            font-style: italic;
+            font-size: 1.05rem;
+            color: var(--text-color-medium);
+        }
+
+        /* Leaderboard Table */
+        .leaderboard-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1.5rem;
+            background-color: var(--card-background-light);
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px var(--shadow-light);
+        }
+
+        .leaderboard-table th, .leaderboard-table td {
+            padding: 15px 20px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+            font-size: 1rem;
+        }
+
+        .leaderboard-table th {
+            background-color: #f0f2f7;
+            color: var(--primary-color);
+            font-weight: bold;
+            text-transform: uppercase;
+            font-size: 0.95rem;
+        }
+
+        .leaderboard-table tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        .leaderboard-table tbody tr:hover {
+            background-color: #f9f9f9;
+        }
+
+        .leaderboard-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            object-fit: cover;
+            vertical-align: middle;
+            margin-right: 10px;
+            border: 2px solid var(--accent-color);
+        }
+
+        .current-user-row {
+            background-color: #e0f2f7;
+            font-weight: bold;
+        }
+
+        /* Medals */
+        .gold-medal { color: var(--gold-medal); font-size: 1.5em; text-shadow: 1px 1px 2px rgba(0,0,0,0.3); }
+        .silver-medal { color: var(--silver-medal); font-size: 1.4em; text-shadow: 1px 1px 2px rgba(0,0,0,0.3); }
+        .bronze-medal { color: var(--bronze-medal); font-size: 1.3em; text-shadow: 1px 1px 2px rgba(0,0,0,0.3); }
+
+
+        /* My Stats Tab */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-top: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background-color: #e6f7ff;
+            padding: 1.5rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+            text-align: center;
+            border-left: 5px solid var(--accent-color);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 15px rgba(0,0,0,0.1);
+        }
+
+        .stat-card h3 {
+            color: var(--primary-color);
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-card p {
+            font-size: 2rem;
+            font-weight: bold;
+            color: var(--accent-color);
+            margin: 0;
+        }
+
+        .skill-matrix-section {
+            margin-top: 3rem;
+            background-color: var(--card-background-light);
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px var(--shadow-light);
+        }
+
+        .skill-matrix-section h2 {
+            text-align: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .chart-container {
+            position: relative;
+            height: 400px;
+            width: 100%;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+
+        /* Daily Tips */
+        .tips-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-top: 1.5rem;
+        }
+
+        .tip-card {
+            background-color: #e8f5e9;
+            padding: 1.8rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+            border-left: 6px solid var(--success-color);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .tip-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 15px rgba(0,0,0,0.1);
+        }
+
+        .tip-card h3 {
+            color: var(--success-color);
+            margin-bottom: 0.8rem;
+        }
+
+        .tip-card p {
+            color: var(--text-color-medium);
+            font-size: 1rem;
+        }
+
+        /* Security News */
+        .news-feed {
+            margin-top: 1.5rem;
+        }
+
+        .news-item {
+            background-color: #fdfdfd;
+            padding: 1.5rem;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+            margin-bottom: 1.2rem;
+            border-left: 6px solid var(--primary-color);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .news-item:hover {
+            transform: translateX(5px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        }
+
+        .news-item .news-date {
+            font-size: 0.9rem;
+            color: #888;
+            margin-bottom: 0.6rem;
+        }
+
+        .news-item .news-title {
+            font-weight: bold;
+            color: var(--primary-color);
+            margin-bottom: 0.6rem;
+            font-size: 1.15rem;
+        }
+
+        .news-item .news-summary {
+            font-size: 1rem;
+            color: var(--text-color-medium);
+        }
+
+        .news-item a {
+            color: var(--accent-color);
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .news-item a:hover {
+            text-decoration: underline;
+        }
+
+        /* Toggle Mode Button */
+        .toggle-mode-button {
+            background-color: var(--accent-color);
+            color: white;
+            padding: 0.8rem 1.2rem;
+            border-radius: 50px;
+            font-size: 0.9rem;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+            transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .toggle-mode-button:hover {
+            background-color: #2980b9;
+            transform: translateY(-3px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.3);
+        }
+
+        .toggle-mode-button:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+
+        /* Confetti Canvas */
+        #confetti-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 999;
+            display: none;
+        }
+
+        /* Custom Modal for Logout Confirmation */
+        .custom-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1001;
+        }
+
+        .modal-content {
+            background-color: var(--card-background-light);
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.25);
+            text-align: center;
+            max-width: 400px;
+            width: 90%;
+            transform: translateY(-20px);
+            opacity: 0;
+            animation: modal-fade-in 0.3s forwards;
+        }
+
+        @keyframes modal-fade-in {
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .modal-content h3 {
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+            font-size: 1.6rem;
+        }
+
+        .modal-content p {
+            color: var(--text-color-medium);
+            margin-bottom: 1.5rem;
+            font-size: 1.1rem;
+        }
+
+        .modal-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+        }
+
+        .modal-buttons button {
+            padding: 0.7rem 1.5rem;
+            font-size: 1rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .modal-buttons .confirm-btn {
+            background-color: var(--error-color);
+        }
+
+        .modal-buttons .confirm-btn:hover {
+            background-color: #c0392b;
+        }
+
+        .modal-buttons .cancel-btn {
+            background-color: #95a5a6;
+        }
+
+        .modal-buttons .cancel-btn:hover {
+            background-color: #7f8c8d;
+        }
+
+        /* Module Page Specific Styles */
+        .module-page-container {
+            width: 100%;
+            max-width: 1000px;
+            margin: 2rem auto;
+            background-color: var(--card-background-light);
+            border-radius: 18px;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.1);
+            padding: 2.5rem;
+        }
+
+        .module-header {
+            text-align: center;
+            margin-bottom: 2rem;
+            position: relative; /* Keep relative for back button positioning on desktop */
+        }
+
+        .module-header h1 {
+            font-size: 2.5rem;
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+        }
+
+        .back-to-dashboard-btn {
+            position: absolute;
+            left: 0;
+            top: 0;
+            background-color: #6c757d;
+            padding: 0.6rem 1.2rem;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .back-to-dashboard-btn:hover {
+            background-color: #5a6268;
+        }
+
+        .module-content-area {
+            padding: 1.5rem;
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            background-color: #f9f9f9;
+            box-shadow: inset 0 0 8px rgba(0,0,0,0.05);
+        }
+
+        #module-content h3 {
+            color: var(--secondary-color);
+            font-size: 1.6rem;
+            border-bottom: 2px solid var(--accent-color);
+            padding-bottom: 0.5rem;
+            margin-top: 2rem;
+            margin-bottom: 1.5rem;
+        }
+
+        #module-content p, #module-content li {
+            font-size: 1.05rem;
+            color: var(--text-color-medium);
+            margin-bottom: 1rem;
+        }
+
+        #module-content ul, #module-content ol {
+            margin-left: 25px;
+            margin-bottom: 1.5rem;
+        }
+
+        #module-content ul li, #module-content ol li {
+            margin-bottom: 0.5rem;
+        }
+
+        .module-assessment {
+            margin-top: 3rem;
+            background-color: var(--card-background-light);
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px var(--shadow-light);
+        }
+
+        .module-assessment h2 {
+            text-align: center;
+            color: var(--primary-color);
+            margin-bottom: 1.5rem;
+        }
+
+        .module-assessment p {
+            text-align: center;
+            font-size: 1.1rem;
+            color: var(--text-color-medium);
+            margin-bottom: 2rem;
+        }
+
+        .module-assessment .quiz-question {
+            background-color: #f0f8ff;
+            border-left: 5px solid var(--accent-color);
+            padding: 1.2rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .module-assessment button {
+            display: block;
+            margin: 2rem auto 0;
+        }
+
+        .module-progress-bar-container {
+            width: 80%;
+            height: 10px;
+            background-color: #eee;
+            border-radius: 5px;
+            margin: 1rem auto 0;
+            overflow: hidden;
+            box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        .module-content-progress-bar {
+            height: 100%;
+            width: 0%;
+            background-color: var(--success-color);
+            border-radius: 5px;
+            transition: width 1s ease-out;
+        }
+
+
+        /* Responsive Design */
+        @media (max-width: 992px) {
+            .container {
+                grid-template-columns: 1fr; /* Sidebar stacks on top */
+                margin: 1rem;
+                border-radius: 8px;
+                gap: 1.5rem; /* Reduce gap */
+            }
+
+            .sidebar {
+                border-radius: 8px 8px 0 0; /* Rounded top corners */
+                padding-bottom: 1rem;
+                width: 100%; /* Ensure it takes full width */
+            }
+
+            .dashboard-content {
+                border-radius: 0 0 8px 8px; /* Rounded bottom corners */
+                padding: 1.5rem; /* Adjust padding */
+            }
+
+            .main-nav .nav-button {
+                padding: 0.9rem 1.2rem;
+                font-size: 1.05rem;
+            }
+
+            .summary-cards, .module-list, .tips-grid, .stats-grid {
+                grid-template-columns: 1fr; /* Single column layout */
+            }
+
+            .toggle-mode-button {
+                bottom: 10px;
+                right: 10px;
+                padding: 0.6rem 1rem;
+                font-size: 0.8rem;
+            }
+
+            h1 {
+                font-size: 1.8rem;
+            }
+            h2 {
+                font-size: 1.5rem;
+            }
+            h3 {
+                font-size: 1.2rem;
+            }
+            body {
+                font-size: 15px;
+            }
+
+            .module-page-container {
+                margin: 1rem;
+                padding: 1.5rem;
+            }
+            .module-header h1 {
+                font-size: 2rem;
+            }
+            .back-to-dashboard-btn {
+                position: static; /* Remove absolute positioning */
+                margin-bottom: 1rem;
+                width: 100%;
+                justify-content: center;
+            }
+            .leaderboard-table th, .leaderboard-table td {
+                padding: 12px 15px; /* Slightly reduce padding */
+                font-size: 0.95rem;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .login-box {
+                margin: 2rem auto;
+                padding: 1.5rem;
+            }
+            .login-box h2 {
+                font-size: 1.6rem;
+            }
+            .login-box input {
+                padding: 0.7rem;
+                font-size: 1rem;
+            }
+            button {
+                padding: 0.7rem 1.2rem;
+                font-size: 0.95rem;
+            }
+            .main-nav .nav-button {
+                flex-direction: column; /* Stack icon and text */
+                text-align: center;
+                gap: 5px;
+                padding: 0.8rem;
+            }
+            .main-nav .nav-button i {
+                margin-right: 0;
+                margin-bottom: 5px;
+            }
+            .sidebar-header .user-name-display {
+                font-size: 1.2rem;
+            }
+            .user-points, .session-timer {
+                font-size: 1rem;
+            }
+            .summary-cards, .module-list, .tips-grid, .quiz-selection, .ctf-selection, .stats-grid {
+                gap: 1rem;
+            }
+            .card, .module-card, .tip-card, .news-item, #quiz-area, #ctf-area, .stat-card, .module-assessment {
+                padding: 1.2rem;
+            }
+            .leaderboard-table th, .leaderboard-table td {
+                padding: 8px 10px; /* Further reduce padding for small screens */
+                font-size: 0.85rem;
+            }
+            .leaderboard-avatar {
+                width: 30px;
+                height: 30px;
+            }
+            .chart-container {
+                height: 300px;
+            }
+            /* Ensure table content doesn't overflow on very small screens */
+            .leaderboard-table {
+                display: block; /* Make table a block element */
+                overflow-x: auto; /* Enable horizontal scrolling for the table */
+                white-space: nowrap; /* Prevent text wrapping inside cells */
+                -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
+            }
+            .leaderboard-table thead, .leaderboard-table tbody, .leaderboard-table tr {
+                display: inline-block; /* Make table elements behave like blocks */
+                vertical-align: top; /* Align them to the top */
+            }
+            .leaderboard-table td, .leaderboard-table th {
+                display: block; /* Make cells block elements */
+                text-align: right; /* Align text to the right for "label: value" effect */
+                padding-left: 50%; /* Space for pseudo-element label */
+                position: relative;
+            }
+            .leaderboard-table td::before { /* Add labels for mobile view */
+                content: attr(data-label);
+                position: absolute;
+                left: 10px;
+                width: 45%;
+                padding-right: 10px;
+                white-space: nowrap;
+                text-align: left;
+                font-weight: bold;
+            }
+            /* Specific labels for each column */
+            .leaderboard-table th:nth-of-type(1), .leaderboard-table td:nth-of-type(1)::before { content: "Rank:"; }
+            .leaderboard-table th:nth-of-type(2), .leaderboard-table td:nth-of-type(2)::before { content: "Medal:"; }
+            .leaderboard-table th:nth-of-type(3), .leaderboard-table td:nth-of-type(3)::before { content: "Avatar:"; }
+            .leaderboard-table th:nth-of-type(4), .leaderboard-table td:nth-of-type(4)::before { content: "User:"; }
+            .leaderboard-table th:nth-of-type(5), .leaderboard-table td:nth-of-type(5)::before { content: "Points:"; }
+            .leaderboard-table th:nth-of-type(6), .leaderboard-table td:nth-of-type(6)::before { content: "Quizzes:"; }
+            .leaderboard-table th:nth-of-type(7), .leaderboard-table td:nth-of-type(7)::before { content: "Modules:"; }
+            .leaderboard-table th:nth-of-type(8), .leaderboard-table td:nth-of-type(8)::before { content: "CTFs:"; }
+            /* Hide table headers on mobile when using pseudo-elements */
+            .leaderboard-table thead {
+                display: none;
+            }
+        }
+
+        /* dark-mode.css */
+
+        body.dark-mode {
+            background-color: #1a202c;
+            color: #e2e8f0;
+        }
+
+        body.dark-mode h1,
+        body.dark-mode h2,
+        body.dark-mode h3 {
+            color: #63b3ed;
+        }
+
+        body.dark-mode .login-box,
+        body.dark-mode form,
+        body.dark-mode .container,
+        body.dark-mode .dashboard-content,
+        body.dark-mode .card,
+        body.dark-mode .module-card,
+        body.dark-mode .leaderboard-table,
+        body.dark-mode .news-item,
+        body.dark-mode #quiz-area,
+        body.dark-mode #ctf-area,
+        body.dark-mode .tip-card,
+        body.dark-mode .stat-card,
+        body.dark-mode .skill-matrix-section,
+        body.dark-mode .module-page-container,
+        body.dark-mode .module-assessment,
+        body.dark-mode .quiz-question,
+        body.dark-mode .ctf-question
+        {
+            background: #2d3748;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+        }
+
+        body.dark-mode .sidebar {
+            background: #1a202c;
+            box-shadow: inset -5px 0 15px rgba(0,0,0,0.3);
+        }
+
+        body.dark-mode input[type="text"],
+        body.dark-mode input[type="password"] {
+            background-color: #4a5568;
+            color: #e2e8f0;
+            border: 1px solid #4a5568;
+        }
+
+        body.dark-mode input[type="text"]:focus,
+        body.dark-mode input[type="password"]:focus {
+            border-color: #63b3ed;
+            box-shadow: 0 0 0 3px rgba(99, 179, 237, 0.3);
+        }
+
+        body.dark-mode button {
+            background-color: #4299e1;
+            color: white;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+        }
+
+        body.dark-mode button:hover {
+            background-color: #3182ce;
+            transform: translateY(-3px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.4);
+        }
+
+        body.dark-mode button:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+        }
+
+        body.dark-mode button.active {
+            background-color: #3182ce;
+            box-shadow: inset 0 2px 5px rgba(0,0,0,0.4);
+        }
+
+        /* Specific dark mode styles for navigation buttons */
+        body.dark-mode .main-nav .nav-button {
+            color: #e2e8f0;
+        }
+
+        body.dark-mode .main-nav .nav-button:hover {
+            background-color: #2d3748;
+        }
+
+        body.dark-mode .main-nav .nav-button.active {
+            background-color: #2d3748;
+        }
+
+        body.dark-mode .main-nav .nav-button.active::before {
+            background-color: #63b3ed;
+        }
+
+        body.dark-mode .logout-button {
+            background-color: #c53030;
+        }
+
+        body.dark-mode .logout-button:hover {
+            background-color: #9b2c2c;
+        }
+
+        body.dark-mode .sidebar-footer {
+            border-top: 1px solid rgba(255,255,255,0.08);
+        }
+
+        /* Adjust text color for specific elements in dark mode */
+        body.dark-mode p,
+        body.dark-mode label,
+        body.dark-mode small#strength-text,
+        body.dark-mode .news-item .news-summary,
+        body.dark-mode .news-item .news-date,
+        body.dark-mode .dashboard-intro,
+        body.dark-mode .quiz-question p,
+        body.dark-mode .ctf-question p,
+        body.dark-mode .quiz-answer-review p,
+        body.dark-mode .tip-card p,
+        body.dark-mode .leaderboard-table td,
+        body.dark-mode #module-content p,
+        body.dark-mode #module-content li,
+        body.dark-mode .tackled-categories p
+        {
+            color: #cbd5e0;
+        }
+
+        body.dark-mode .news-item .news-title {
+            color: #63b3ed;
+        }
+
+        body.dark-mode #status,
+        body.dark-mode #quiz-feedback,
+        body.dark-mode #ctf-feedback,
+        body.dark-mode #assessment-feedback {
+            color: #48bb78;
+        }
+
+        body.dark-mode .leaderboard-table th {
+            background-color: #4a5568;
+            color: #e2e8f0;
+        }
+
+        body.dark-mode .leaderboard-table td {
+            border-bottom: 1px solid #4a5568;
+        }
+
+        body.dark-mode .leaderboard-table tbody tr:hover {
+            background-color: #4a5568;
+        }
+
+        body.dark-mode .current-user-row {
+            background-color: #3a475a;
+        }
+
+        /* Dashboard Cards in Dark Mode */
+        body.dark-mode .card {
+            background-color: #34495e;
+            box-shadow: 0 6px 15px rgba(0,0,0,0.2);
+        }
+        body.dark-mode .card:hover {
+            box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+        }
+        body.dark-mode .card h3 {
+            color: #63b3ed;
+        }
+        body.dark-mode .card p {
+            color: #cbd5e0;
+        }
+        body.dark-mode .card button {
+            background-color: #4299e1;
+        }
+        body.dark-mode .card button:hover {
+            background-color: #3182ce;
+        }
+
+        /* Daily Threat Alert in Dark Mode */
+        body.dark-mode .daily-threat-alert {
+            background-color: #4a3c2e;
+            border-left-color: #d35400;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+        }
+        body.dark-mode .daily-threat-alert h3 {
+            color: #f39c12;
+        }
+        body.dark-mode .daily-threat-alert p {
+            color: #e0b284;
+        }
+        body.dark-mode .daily-threat-alert button {
+            background-color: #e67e22;
+        }
+        body.dark-mode .daily-threat-alert button:hover {
+            background-color: #d35400;
+        }
+
+        body.dark-mode .tackled-categories {
+            background-color: #3a475a;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+        }
+        body.dark-mode .tackled-categories h2 {
+            color: #63b3ed;
+        }
+        body.dark-mode .badge {
+            background-color: #63b3ed;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+        body.dark-mode .badge:hover {
+            background-color: #4299e1;
+        }
+
+
+        /* Learning Modules in Dark Mode */
+        body.dark-mode .module-card {
+            background-color: #34495e;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+        }
+        body.dark-mode .module-card:hover:not(.locked) {
+            box-shadow: 0 8px 15px rgba(0,0,0,0.3);
+        }
+        body.dark-mode .module-card h3 {
+            color: #63b3ed;
+        }
+        body.dark-mode .module-card p {
+            color: #cbd5e0;
+        }
+        body.dark-mode .module-card .start-module-btn {
+            background-color: #4299e1;
+        }
+        body.dark-mode .module-card .start-module-btn:hover {
+            background-color: #3182ce;
+        }
+        body.dark-mode .module-card .module-status {
+            color: #48bb78;
+        }
+        body.dark-mode .module-card.locked {
+            filter: brightness(0.7) grayscale(50%);
+        }
+        body.dark-mode .lock-overlay {
+            background-color: rgba(0,0,0,0.7);
+        }
+        body.dark-mode .module-card.completed {
+            border-color: #48bb78;
+            box-shadow: 0 4px 15px rgba(72, 187, 120, 0.2);
+        }
+
+        /* Module Page Specific Styles in Dark Mode */
+        body.dark-mode .module-page-container {
+            background-color: #2d3748;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.4);
+        }
+        body.dark-mode .module-header h1 {
+            color: #63b3ed;
+        }
+        body.dark-mode .back-to-dashboard-btn {
+            background-color: #4a5568;
+            color: #e2e8f0;
+        }
+        body.dark-mode .back-to-dashboard-btn:hover {
+            background-color: #3a475a;
+        }
+        body.dark-mode .module-content-area {
+            background-color: #3a475a;
+            border: 1px solid #4a5568;
+            box-shadow: inset 0 0 8px rgba(0,0,0,0.1);
+        }
+        body.dark-mode #module-content h3 {
+            color: #63b3ed;
+            border-bottom-color: #63b3ed;
+        }
+        body.dark-mode #module-content p, body.dark-mode #module-content li {
+            color: #cbd5e0;
+        }
+        body.dark-mode .module-assessment {
+            background-color: #34495e;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+        body.dark-mode .module-assessment h2 {
+            color: #63b3ed;
+        }
+        body.dark-mode .module-assessment p {
+            color: #cbd5e0;
+        }
+        body.dark-mode .module-assessment .quiz-question {
+            background-color: #3a475a;
+            border-left-color: #63b3ed;
+        }
+        body.dark-mode .module-content-progress-bar {
+            background-color: #48bb78;
+        }
+
+
+        /* Quizzes in Dark Mode */
+        body.dark-mode .quiz-select-btn {
+            background-color: #63b3ed;
+        }
+        body.dark-mode .quiz-select-btn:hover {
+            background-color: #4299e1;
+        }
+        body.dark-mode #quiz-area {
+            background: #2d3748;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+        body.dark-mode .quiz-progress-container {
+            background-color: #4a5568;
+        }
+        body.dark-mode .quiz-progress-bar {
+            background-color: #63b3ed;
+        }
+        body.dark-mode #quiz-progress-text {
+            color: #e2e8f0;
+            text-shadow: 0 0 2px rgba(0,0,0,0.7);
+        }
+        body.dark-mode .quiz-question {
+            background-color: #3a475a;
+            border: 1px solid #4a5568;
+        }
+        body.dark-mode .quiz-question p {
+            color: #e2e8f0;
+        }
+        body.dark-mode .quiz-answer-review {
+            background-color: #3a475a;
+            border-left-color: #63b3ed;
+        }
+        body.dark-mode .correct-answer {
+            color: #48bb78;
+        }
+        body.dark-mode .incorrect-answer {
+            color: #e74c3c;
+        }
+        body.dark-mode .correct-answer-text {
+            color: #48bb78;
+        }
+        body.dark-mode .incorrect-answer-text {
+            color: #e74c3c;
+        }
+
+        /* CTF Challenges in Dark Mode */
+        body.dark-mode .ctf-select-btn {
+            background-color: #d35400;
+        }
+        body.dark-mode .ctf-select-btn:hover {
+            background-color: #a04000;
+        }
+        body.dark-mode #ctf-area {
+            background: #2d3748;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+        body.dark-mode #ctf-scenario-text {
+            background-color: #3a475a;
+            border-left-color: #63b3ed;
+            color: #cbd5e0;
+        }
+        body.dark-mode .ctf-question {
+            background-color: #3a475a;
+            border: 1px solid #4a5568;
+        }
+
+        /* My Stats Tab in Dark Mode */
+        body.dark-mode .stat-card {
+            background-color: #3a475a;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+            border-left-color: #63b3ed;
+        }
+        body.dark-mode .stat-card:hover {
+            box-shadow: 0 8px 15px rgba(0,0,0,0.3);
+        }
+        body.dark-mode .stat-card h3 {
+            color: #63b3ed;
+        }
+        body.dark-mode .stat-card p {
+            color: #90cdf4;
+        }
+        body.dark-mode .skill-matrix-section {
+            background-color: #2d3748;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+        body.dark-mode .skill-matrix-section h2 {
+            color: #63b3ed;
+        }
+
+        /* Daily Tips in Dark Mode */
+        body.dark-mode .tip-card {
+            background-color: #3a475a;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+            border-left-color: #48bb78;
+        }
+        body.dark-mode .tip-card:hover {
+            box-shadow: 0 8px 15px rgba(0,0,0,0.3);
+        }
+        body.dark-mode .tip-card h3 {
+            color: #48bb78;
+        }
+        body.dark-mode .tip-card p {
+            color: #cbd5e0;
+        }
+
+        /* Security News in Dark Mode */
+        body.dark-mode .news-item {
+            background-color: #3a475a;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            border-left-color: #63b3ed;
+        }
+        body.dark-mode .news-item:hover {
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        }
+        body.dark-mode .news-item .news-date {
+            color: #9eabc1;
+        }
+        body.dark-mode .news-item .news-title {
+            color: #63b3ed;
+        }
+        body.dark-mode .news-item .news-summary {
+            color: #cbd5e0;
+        }
+        body.dark-mode .news-item a {
+            color: #90cdf4;
+        }
+        body.dark-mode .news-item a:hover {
+            text-decoration: underline;
+        }
+
+        /* Toggle Mode Button */
+        body.dark-mode .toggle-mode-button {
+            background-color: #63b3ed;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.4);
+        }
+        body.dark-mode .toggle-mode-button:hover {
+            background-color: #4299e1;
+            transform: translateY(-3px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.5);
+        }
+
+        /* Custom Modal in Dark Mode */
+        body.dark-mode .custom-modal .modal-content {
+            background-color: #2d3748;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
+        }
+        body.dark-mode .modal-content h3 {
+            color: #63b3ed;
+        }
+        body.dark-mode .modal-content p {
+            color: #cbd5e0;
+        }
+        body.dark-mode .modal-buttons .confirm-btn {
+            background-color: #c53030;
+        }
+        body.dark-mode .modal-buttons .confirm-btn:hover {
+            background-color: #9b2c2c;
+        }
+        body.dark-mode .modal-buttons .cancel-btn {
+            background-color: #718096;
+        }
+        body.dark-mode .modal-buttons .cancel-btn:hover {
+            background-color: #5f6b7d;
+        }
+    </style>
+</head>
+<body onload="initApp()">
+    <!-- Login Section -->
+    <div id="login-section" class="login-box">
+        <h2>Welcome Back</h2>
+        <form onsubmit="handleLogin(event)">
+            <input type="text" id="username" placeholder="👤 Username" required />
+            <input type="password" id="password" placeholder="🔑 Password" required oninput="checkPasswordStrength()" />
+            <div id="strength-bar"><div id="strength-level"></div></div>
+            <small id="strength-text"></small>
+            <button type="submit">Login</button>
+        </form>
+    </div>
+
+    <!-- Dashboard Section -->
+    <div id="dashboard-section" class="container" style="display:none;">
+        <!-- Main Sidebar Navigation -->
+        <aside class="sidebar left-sidebar">
+            <div class="sidebar-header">
+                <div class="user-profile">
+                    <img id="user-avatar" src="https://placehold.co/60x60/cccccc/ffffff?text=AV" alt="User Avatar" class="user-avatar">
+                    <h2 class="user-name-display">Welcome, <span id="user-name-sidebar"></span></h2>
+                </div>
+                <p class="user-points"><i class="fas fa-star"></i> Points: <span id="user-points-display">0</span></p>
+                <p class="session-timer"><i class="fas fa-clock"></i> Session: <span id="session-timer-display">00:00:00</span></p>
+            </div>
+            <nav class="main-nav">
+                <ul>
+                    <li><button class="nav-button active" onclick="showDashboardTab('dashboard')"><i class="fas fa-tachometer-alt"></i> Dashboard</button></li>
+                    <li><button class="nav-button" onclick="showDashboardTab('checklist')"><i class="fas fa-clipboard-check"></i> Daily Checklist</button></li>
+                    <li><button class="nav-button" onclick="showDashboardTab('learning')"><i class="fas fa-book"></i> Learning Modules</button></li>
+                    <li><button class="nav-button" onclick="showDashboardTab('quizzes')"><i class="fas fa-question-circle"></i> Quizzes</button></li>
+                    <li><button class="nav-button" onclick="showDashboardTab('ctf')"><i class="fas fa-flag"></i> CTF Challenges</button></li>
+                    <li><button class="nav-button" onclick="showDashboardTab('leaderboard')"><i class="fas fa-trophy"></i> Leaderboard</button></li>
+                    <li><button class="nav-button" onclick="showDashboardTab('stats')"><i class="fas fa-chart-line"></i> My Stats</button></li>
+                    <li><button class="nav-button" onclick="showDashboardTab('tips')"><i class="fas fa-lightbulb"></i> Daily Tips</button></li>
+                    <li><button class="nav-button" onclick="showDashboardTab('news')"><i class="fas fa-newspaper"></i> Security News</button></li>
+                    <li><button class="nav-button logout-button" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Logout</button></li>
+                </ul>
+            </nav>
+            <div class="sidebar-footer">
+                <h3>📊 Your Progress</h3>
+                <p id="progress">Checklist completion: <span id="completion">0%</span></p>
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="dashboard-content">
+            <!-- Dashboard Overview Tab -->
+            <div id="dashboard" class="tab-content active-tab">
+                <h1>Overview, <span id="user-name-main"></span>!</h1>
+                <p class="dashboard-intro">Your personalized cyber hygiene summary and quick actions:</p>
+                <div class="summary-cards">
+                    <div class="card">
+                        <h3>Checklist Status</h3>
+                        <p id="dashboard-checklist-status">Not started today.</p>
+                        <button onclick="showDashboardTab('checklist')">Go to Checklist</button>
+                    </div>
+                    <div class="card">
+                        <h3>Quiz Progress</h3>
+                        <p id="dashboard-quiz-progress">No quizzes completed yet.</p>
+                        <button onclick="showDashboardTab('quizzes')">Take a Quiz</button>
+                    </div>
+                    <div class="card">
+                        <h3>Latest Tip</h3>
+                        <p id="dashboard-latest-tip">Enable two-factor authentication (2FA) on all accounts.</p>
+                        <button onclick="showDashboardTab('tips')">More Tips</button>
+                    </div>
+                </div>
+                <div class="daily-threat-alert">
+                    <h3>🚨 Today's Top Threat Alert!</h3>
+                    <p>Be vigilant about **Phishing Scams** targeting online shopping and delivery notifications. Always verify sender and links!</p>
+                    <button onclick="showDashboardTab('news')">Read More News</button>
+                </div>
+                <div class="tackled-categories">
+                    <h2>Most Tackled Categories</h2>
+                    <p>Areas where you've spent the most time learning or challenging yourself.</p>
+                    <div id="most-tackled-display" class="category-badges">
+                        <!-- Dynamically populated -->
+                        <span class="badge">No activity yet</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Daily Checklist Tab -->
+            <div id="checklist" class="tab-content">
+                <h2>🧼 Daily Cyber Hygiene Checklist</h2>
+                <p>Mark the tasks you've completed today to stay secure:</p>
+                <form id="hygiene-form">
+                    <label><input type="checkbox" id="antivirus" /> Updated antivirus software</label>
+                    <label><input type="checkbox" id="no-links" /> No unknown links clicked</label>
+                    <label><input type="checkbox" id="password" /> Changed password this week</label>
+                    <label><input type="checkbox" id="backup" /> Backed up critical files</label>
+                    <label><input type="checkbox" id="strong-passwords" /> Used strong passwords</label>
+                    <label><input type="checkbox" id="privacy-settings" /> Reviewed privacy settings on social media/apps</label>
+                    <label><input type="checkbox" id="vpn-used" /> Used VPN on public Wi-Fi</label>
+                    <label><input type="checkbox" id="app-updates" /> Updated mobile apps and OS</label>
+                    <label><input type="checkbox" id="email-sender" /> Verified email sender before opening</label>
+                    <label><input type="checkbox" id="data-breach-check" /> Checked for personal data breaches (e.g., Have I Been Pwned?)</label>
+                    <button type="button" onclick="saveChecklist()">Save Checklist</button>
+                </form>
+                <p id="status" class="feedback-message"></p>
+            </div>
+
+            <!-- Learning Modules Tab -->
+            <div id="learning" class="tab-content">
+                <h2>📚 Learning Modules</h2>
+                <p>Expand your knowledge with these interactive modules. Complete them one by one to unlock new challenges!</p>
+                <div class="module-list">
+                    <!-- Module 1 -->
+                    <div class="module-card" id="module-card-1">
+                        <h3>Module 1: Phishing Awareness Basics</h3>
+                        <p>Learn to identify common phishing tactics and protect your personal information.</p>
+                        <div class="module-actions">
+                            <button class="start-module-btn" onclick="startModule(1)">Start Module</button>
+                            <span class="module-status" style="display:none;">Completed! ✅</span>
+                        </div>
+                    </div>
+                    <!-- Module 2 -->
+                    <div class="module-card locked" id="module-card-2">
+                        <h3>Module 2: Strong Password & 2FA</h3>
+                        <p>Discover best practices for creating uncrackable passwords and enabling two-factor authentication.</p>
+                        <div class="module-actions">
+                            <button class="start-module-btn" onclick="startModule(2)" disabled>Start Module</button>
+                            <span class="module-status" style="display:none;">Completed! ✅</span>
+                        </div>
+                        <div class="lock-overlay"><i class="fas fa-lock"></i> Locked</div>
+                    </div>
+                    <!-- Module 3 -->
+                    <div class="module-card locked" id="module-card-3">
+                        <h3>Module 3: Understanding Malware Types</h3>
+                        <p>Explore different types of malware (viruses, ransomware, spyware) and how they operate.</p>
+                        <div class="module-actions">
+                            <button class="start-module-btn" onclick="startModule(3)" disabled>Start Module</button>
+                            <span class="module-status" style="display:none;">Completed! ✅</span>
+                        </div>
+                        <div class="lock-overlay"><i class="fas fa-lock"></i> Locked</div>
+                    </div>
+                    <!-- Module 4 -->
+                    <div class="module-card locked" id="module-card-4">
+                        <h3>Module 4: Secure Browsing & Downloads</h3>
+                        <p>Learn tips for safe web browsing, identifying secure websites, and safe file downloads.</p>
+                        <div class="module-actions">
+                            <button class="start-module-btn" onclick="startModule(4)" disabled>Start Module</button>
+                            <span class="module-status" style="display:none;">Completed! ✅</span>
+                        </div>
+                        <div class="lock-overlay"><i class="fas fa-lock"></i> Locked</div>
+                    </div>
+                    <!-- Module 5 -->
+                    <div class="module-card locked" id="module-card-5">
+                        <h3>Module 5: Social Engineering Tactics</h3>
+                        <p>Uncover the psychological tricks cybercriminals use to manipulate you into revealing information.</p>
+                        <div class="module-actions">
+                            <button class="start-module-btn" onclick="startModule(5)" disabled>Start Module</button>
+                            <span class="module-status" style="display:none;">Completed! ✅</span>
+                        </div>
+                        <div class="lock-overlay"><i class="fas fa-lock"></i> Locked</div>
+                    </div>
+                    <!-- Module 6 -->
+                    <div class="module-card locked" id="module-card-6">
+                        <h3>Module 6: Data Backup & Recovery</h3>
+                        <p>Understand the importance of data backups and strategies for effective recovery after an incident.</p>
+                        <div class="module-actions">
+                            <button class="start-module-btn" onclick="startModule(6)" disabled>Start Module</button>
+                            <span class="module-status" style="display:none;">Completed! ✅</span>
+                        </div>
+                        <div class="lock-overlay"><i class="fas fa-lock"></i> Locked</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quizzes Tab -->
+            <div id="quizzes" class="tab-content">
+                <h2>🧠 Cyber Security Quizzes</h2>
+                <p>Test your knowledge! Each quiz has 10 questions. Earn points for correct answers!</p>
+                <div class="quiz-selection">
+                    <button class="quiz-select-btn" onclick="loadQuiz(1)">Quiz 1: Fundamentals</button>
+                    <button class="quiz-select-btn" onclick="loadQuiz(2)">Quiz 2: Advanced Threats</button>
+                    <button class="quiz-select-btn" onclick="loadQuiz(3)">Quiz 3: Data Protection</button>
+                    <button class="quiz-select-btn" onclick="loadQuiz(4)">Quiz 4: Network Security</button>
+                    <button class="quiz-select-btn" onclick="loadQuiz(5)">Quiz 5: Web Security</button>
+                </div>
+
+                <div id="quiz-area" style="display:none;">
+                    <h3 id="current-quiz-title"></h3>
+                    <div class="quiz-progress-container">
+                        <div class="quiz-progress-bar" id="quiz-progress-bar"></div>
+                        <span id="quiz-progress-text">0%</span>
+                    </div>
+                    <form id="current-quiz-form">
+                        <!-- Questions will be dynamically loaded here -->
+                    </form>
+                    <button type="button" onclick="submitCurrentQuiz()">Submit Quiz</button>
+                    <p id="quiz-feedback" class="feedback-message"></p>
+                </div>
+            </div>
+
+            <!-- CTF Challenges Tab -->
+            <div id="ctf" class="tab-content">
+                <h2>🚩 CTF Challenges: Real-World Scenarios</h2>
+                <p>Sharpen your cybersecurity skills by identifying suspicious elements and spotting red flags in simulated scenarios. Earn points for successful identification!</p>
+                <div class="ctf-selection">
+                    <button class="ctf-select-btn" onclick="loadCTF(1)">CTF 1: Phishing Email Analysis</button>
+                    <button class="ctf-select-btn" onclick="loadCTF(2)">CTF 2: Malware Behavior Spotting</button>
+                    <button class="ctf-select-btn" onclick="loadCTF(3)">CTF 3: Website Vulnerability</button>
+                    <button class="ctf-select-btn" onclick="loadCTF(4)">CTF 4: Social Engineering Call</button>
+                    <button class="ctf-select-btn" onclick="loadCTF(5)">CTF 5: Suspicious USB Drive</button>
+                </div>
+
+                <div id="ctf-area" style="display:none;">
+                    <h3 id="current-ctf-title"></h3>
+                    <p id="ctf-scenario-text"></p>
+                    <form id="current-ctf-form">
+                        <!-- CTF questions/options will be dynamically loaded here -->
+                    </form>
+                    <button type="button" onclick="submitCurrentCTF()">Submit Challenge</button>
+                    <p id="ctf-feedback" class="feedback-message"></p>
+                </div>
+            </div>
+
+            <!-- Leaderboard Tab -->
+            <div id="leaderboard" class="tab-content">
+                <h2>🏆 Global Leaderboard</h2>
+                <p>See how you rank against other cyber hygiene champions!</p>
+                <table class="leaderboard-table">
+                    <thead>
+                        <tr>
+                            <th>Rank</th>
+                            <th>Medal</th>
+                            <th>Avatar</th>
+                            <th>User</th>
+                            <th>Points</th>
+                            <th>Quizzes</th>
+                            <th>Modules</th>
+                            <th>CTFs</th>
+                        </tr>
+                    </thead>
+                    <tbody id="leaderboard-body">
+                        <!-- Leaderboard rows will be dynamically generated here -->
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- My Stats Tab -->
+            <div id="stats" class="tab-content">
+                <h2>📈 My Cyber Stats</h2>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <h3>Total Points</h3>
+                        <p id="stats-total-points">0</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Quizzes Completed</h3>
+                        <p id="stats-quizzes-completed">0</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Modules Completed</h3>
+                        <p id="stats-modules-completed">0</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3>CTFs Completed</h3>
+                        <p id="stats-ctfs-completed">0</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Average Quiz Score</h3>
+                        <p id="stats-avg-quiz-score">0%</p>
+                    </div>
+                </div>
+
+                <div class="skill-matrix-section">
+                    <h2>📊 Skill Matrix</h2>
+                    <p>Your proficiency across key cybersecurity domains.</p>
+                    <div class="chart-container">
+                        <canvas id="skillMatrixChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Daily Tips Tab -->
+            <div id="tips" class="tab-content">
+                <h2>💡 Daily Cyber Tips</h2>
+                <p>A curated collection of practical tips to enhance your online safety and privacy:</p>
+                <div class="tips-grid">
+                    <div class="tip-card">
+                        <h3>Password Manager Power</h3>
+                        <p>Use a reputable password manager (e.g., LastPass, Bitwarden) to generate and store unique, strong passwords for all your accounts. Never reuse passwords!</p>
+                    </div>
+                    <div class="tip-card">
+                        <h3>Enable Two-Factor Authentication (2FA)</h3>
+                        <p>Wherever possible, enable 2FA. This adds an extra layer of security, requiring a second verification step (like a code from your phone) in addition to your password.</p>
+                    </div>
+                    <div class="tip-card">
+                        <h3>Beware of Public Wi-Fi</h3>
+                        <p>Public Wi-Fi networks are often unsecured. Avoid accessing sensitive information (banking, email) on them. Always use a Virtual Private Network (VPN) for encryption.</p>
+                    </div>
+                    <div class="tip-card">
+                        <h3>Regular Software Updates</h3>
+                        <p>Keep your operating system, web browsers, and all applications updated. Updates often include critical security patches that fix vulnerabilities exploited by attackers.</p>
+                    </div>
+                    <div class="tip-card">
+                        <h3>Think Before You Click</h3>
+                        <p>Phishing emails and suspicious links are common. Before clicking any link or opening attachments, verify the sender and hover over links to see the true destination URL.</p>
+                    </div>
+                    <div class="tip-card">
+                        <h3>Data Backup Strategy</h3>
+                        <p>Regularly back up your important files to an external drive or a secure cloud service. This protects your data from hardware failures, accidental deletion, or ransomware attacks.</p>
+                    </div>
+                    <div class="tip-card">
+                        <h3>Review Privacy Settings</h3>
+                        <p>Periodically check and adjust the privacy settings on your social media accounts, apps, and online services. Limit the personal information you share publicly.</p>
+                    </div>
+                    <div class="tip-card">
+                        <h3>Strong Antivirus/Anti-Malware</h3>
+                        <p>Install and maintain reputable antivirus and anti-malware software. Run regular scans to detect and remove threats from your devices.</p>
+                    </div>
+                    <div class="tip-card">
+                        <h3>Secure Your Home Network</h3>
+                        <p>Change the default password of your Wi-Fi router, enable WPA3 encryption, and regularly check for firmware updates to protect your home network.</p>
+                    </div>
+                    <div class="tip-card">
+                        <h3>Recognize Social Engineering</h3>
+                        <p>Be skeptical of unsolicited calls, texts, or emails that pressure you for information or immediate action. Verify requests through official channels.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Security News Tab -->
+            <div id="news" class="tab-content">
+                <h2>📰 Latest Security News & Alerts</h2>
+                <p>Stay informed about current cyber threats and important security updates. (Note: Links are placeholders for demonstration purposes.)</p>
+                <div class="news-feed">
+                    <div class="news-item">
+                        <p class="news-date">[Jul 1, 2025]</p>
+                        <p class="news-title">⚠️ **Urgent: New Ransomware Variant Targeting Cloud Backups**</p>
+                        <p class="news-summary">A sophisticated ransomware strain, "CloudLocker," has been identified, specifically designed to encrypt cloud-based backup solutions. Users are advised to verify their backup integrity and consider offline storage. <a href="https://www.example.com/news/cloudlocker-alert" target="_blank">Read More</a></p>
+                    </div>
+                    <div class="news-item">
+                        <p class="news-date">[Jun 28, 2025]</p>
+                        <p class="news-title">📌 **Major Browser Update Fixes Zero-Day Exploit**</p>
+                        <p class="news-summary">Leading web browsers have released emergency updates to patch a critical zero-day vulnerability that allowed remote code execution via malicious websites. Update your browser immediately! <a href="https://www.example.com/news/browser-patch" target="_blank">Read More</a></p>
+                    </div>
+                    <div class="news-item">
+                        <p class="news-date">[Jun 25, 2025]</p>
+                        <p class="news-title">✅ **Phishing Campaign Alert: Fake Invoice Scams on the Rise**</p>
+                        <p class="news-summary">Watch out for emails disguised as invoices from well-known companies. These often contain malicious links or attachments. Always verify directly with the sender. <a href="https://www.example.com/news/invoice-scams" target="_blank">Read More</a></p>
+                    </div>
+                    <div class="news-item">
+                        <p class="news-date">[Jun 20, 2025]</p>
+                        <p class="news-title">💡 **Experts Recommend Hardware Security Keys for Critical Accounts**</p>
+                        <p class="news-summary">For ultimate account protection, cybersecurity experts are increasingly recommending physical hardware security keys (e.g., YubiKey) over SMS or app-based 2FA. <a href="https://www.example.com/news/hardware-keys" target="_blank">Read More</a></p>
+                    </div>
+                    <div class="news-item">
+                        <p class="news-date">[Jun 15, 2025]</p>
+                        <p class="news-title">📊 **New Report: IoT Devices Remain a Major Security Risk**</p>
+                        <p class="news-summary">Many Internet of Things (IoT) devices continue to be vulnerable due to weak default passwords and lack of updates. Secure your smart home! <a href="https://www.example.com/news/iot-risk" target="_blank">Read More</a></p>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Learning Module Content Section -->
+    <div id="module-content-section" class="module-page-container" style="display:none;">
+        <header class="module-header">
+            <!-- Updated onclick to ensure dashboard section is shown -->
+            <button onclick="showDashboardTab('learning'); showSection('dashboard-section');" class="back-to-dashboard-btn"><i class="fas fa-arrow-left"></i> Back to Learning Modules</button>
+            <h1 id="module-content-title">Loading Module...</h1>
+            <div class="module-progress-bar-container">
+                <div id="module-content-progress" class="module-content-progress-bar"></div>
+            </div>
+        </header>
+
+        <main class="module-content-area">
+            <div id="module-text-content">
+                <!-- Module content will be loaded here dynamically -->
+                <p>Loading module content...</p>
+            </div>
+
+            <div id="module-assessment-area" class="module-assessment" style="display:none;">
+                <h2>Module Assessment</h2>
+                <p>Answer these questions to complete the module. You need 70% to pass!</p>
+                <form id="module-assessment-form">
+                    <!-- Assessment questions will be loaded here -->
+                </form>
+                <button type="button" onclick="submitModuleAssessment()">Submit Assessment</button>
+                <p id="module-assessment-feedback" class="feedback-message"></p>
+            </div>
+        </main>
+    </div>
+
+    <!-- Confetti Canvas -->
+    <canvas id="confetti-canvas"></canvas>
+
+    <script>
+        // --- Global Data & Configuration ---
+        const AVATAR_URLS = [
+            "https://placehold.co/60x60/FFD700/000000?text=AV1", // Gold
+            "https://placehold.co/60x60/87CEEB/000000?text=AV2", // SkyBlue
+            "https://placehold.co/60x60/FF6347/FFFFFF?text=AV3", // Tomato
+            "https://placehold.co/60x60/98FB98/000000?text=AV4", // PaleGreen
+            "https://placehold.co/60x60/BA55D3/FFFFFF?text=AV5", // MediumOrchid
+            "https://placehold.co/60x60/FF8C00/FFFFFF?text=AV6", // DarkOrange
+            "https://placehold.co/60x60/20B2AA/FFFFFF?text=AV7", // LightSeaGreen
+            "https://placehold.co/60x60/EE82EE/FFFFFF?text=AV8", // Violet
+            "https://placehold.co/60x60/A9A9A9/FFFFFF?text=AV9", // DarkGray
+            "https://placehold.co/60x60/ADD8E6/000000?text=AV10" // LightBlue
+        ];
+
+        const DEFAULT_LEADERBOARD_USERS = [
+            { username: "CyberSensei", points: 1500, quizzesCompleted: 15, modulesCompleted: 6, ctfsCompleted: 5, avatar: AVATAR_URLS[0] },
+            { username: "InfoSecPro", points: 1200, quizzesCompleted: 12, modulesCompleted: 6, ctfsCompleted: 4, avatar: AVATAR_URLS[1] },
+            { username: "DataDefender", points: 1000, quizzesCompleted: 10, modulesCompleted: 5, ctfsCompleted: 3, avatar: AVATAR_URLS[2] },
+            { username: "NetGuard", points: 800, quizzesCompleted: 8, modulesCompleted: 4, ctfsCompleted: 2, avatar: AVATAR_URLS[3] },
+            { username: "PrivacyPal", points: 600, quizzesCompleted: 6, modulesCompleted: 3, ctfsCompleted: 1, avatar: AVATAR_URLS[4] },
+            { username: "SecureUserX", points: 400, quizzesCompleted: 4, modulesCompleted: 2, ctfsCompleted: 1, avatar: AVATAR_URLS[5] },
+            { username: "DigitalKnight", points: 200, quizzesCompleted: 2, modulesCompleted: 1, ctfsCompleted: 0, avatar: AVATAR_URLS[6] }
+        ];
+
+        const MODULE_ASSESSMENT_PASS_PERCENTAGE = 70;
+
+        const QUIZZES = {
+            1: {
+                title: "Quiz 1: Fundamentals of Cyber Security",
+                category: "Fundamentals",
+                questions: [
+                    { question: "1. What is the primary purpose of a firewall?", options: { a: "To speed up internet connection", b: "To prevent unauthorized access to a network", c: "To store user data", d: "To create strong passwords" }, correct: "b" },
+                    { question: "2. Which of the following is a strong password characteristic?", options: { a: "Short and easy to remember", b: "Contains personal information", c: "Mix of uppercase, lowercase, numbers, and symbols (10+ chars)", d: "Uses only numbers" }, correct: "c" },
+                    { question: "3. What does 'Phishing' refer to?", options: { a: "A type of computer virus", b: "Attempting to trick users into revealing sensitive information", c: "A method for secure data encryption", d: "A network vulnerability scanner" }, correct: "b" },
+                    { question: "4. Why is it important to update your software regularly?", options: { a: "To get new features only", b: "To fix bugs and security vulnerabilities", c: "To consume more data", d: "To change the user interface" }, correct: "b" },
+                    { question: "5. What is Two-Factor Authentication (2FA)?", options: { a: "Using two different passwords for one account", b: "A security method requiring two forms of verification", c: "Sharing your password with two people", d: "Logging in from two devices simultaneously" }, correct: "b" },
+                    { question: "6. What is the best way to protect against ransomware?", options: { a: "Clicking all links", b: "Regularly backing up your data to an external source", c: "Disabling your antivirus", d: "Sharing your files publicly" }, correct: "b" },
+                    { question: "7. What is the 'principle of least privilege'?", options: { a: "Giving all users maximum access", b: "Granting users only the minimum access necessary to perform their job", c: "Allowing users to share passwords", d: "Restricting internet access" }, correct: "b" },
+                    { question: "8. What is 'social engineering'?", options: { a: "Using social media for marketing", b: "Manipulating people to divulge confidential information", c: "Designing user-friendly interfaces", d: "Building social networks" }, correct: "b" },
+                    { question: "9. Which type of malware records keystrokes?", options: { a: "Adware", b: "Spyware", c: "Keylogger", d: "Trojan" }, correct: "c" },
+                    { question: "10. What is 'HTTPS' in a website URL?", options: { a: "A faster internet connection", b: "Indicates a secure, encrypted connection", c: "A type of website design", d: "A social media protocol" }, correct: "b" }
+                ]
+            },
+            2: {
+                title: "Quiz 2: Advanced Cyber Threats",
+                category: "Threats",
+                questions: [
+                    { question: "1. What is 'Ransomware'?", options: { a: "Software that speeds up your computer", b: "Malware that encrypts files and demands payment for decryption", c: "A tool for recovering lost data", d: "A type of secure web browser" }, correct: "b" },
+                    { question: "2. Which attack involves an attacker intercepting communication between two parties?", options: { a: "Denial-of-Service (DoS)", b: "SQL Injection", c: "Man-in-the-Middle (MitM)", d: "Brute Force" }, correct: "c" },
+                    { question: "3. What is a 'Zero-Day Vulnerability'?", options: { a: "A bug discovered on the day software is released", b: "A vulnerability that has been publicly disclosed but not yet patched", c: "A vulnerability known to attackers before the vendor is aware", d: "A security flaw that cannot be exploited" }, correct: "c" },
+                    { question: "4. What is the main goal of 'Spyware'?", options: { a: "To display unwanted advertisements", b: "To secretly monitor and collect user information", c: "To take control of a computer remotely", d: "To spread to other computers" }, correct: "b" },
+                    { question: "5. What is a 'DDoS attack'?", options: { a: "A single computer overloading a server", b: "Multiple compromised systems attacking a single target", c: "An attack that steals data from a database", d: "A method to bypass firewalls" }, correct: "b" },
+                    { question: "6. What is a 'Trojan Horse' in cybersecurity?", options: { a: "A program that replicates itself", b: "Malware disguised as legitimate software", c: "A network scanning tool", d: "A type of antivirus software" }, correct: "b" },
+                    { question: "7. What is 'Pharming'?", options: { a: "A type of farming simulation game", b: "Redirecting users to a fake website without their knowledge", c: "Collecting personal data from social media", d: "A technique to bypass firewalls" }, correct: "b" },
+                    { question: "8. What is 'Malvertising'?", options: { a: "Advertising cybersecurity products", b: "Using legitimate online advertising to spread malware", c: "Creating fake advertisements", d: "Blocking malicious ads" }, correct: "b" },
+                    { question: "9. What is 'Credential Stuffing'?", options: { a: "Creating very long passwords", b: "Using stolen credentials to try and log into multiple online services", c: "Storing passwords securely", d: "Encrypting login information" }, correct: "b" },
+                    { question: "10. What is 'Supply Chain Attack'?", options: { a: "Attacking a company's suppliers", b: "Compromising software/hardware at any stage of its development/delivery", c: "Attacking a company's logistics", d: "Stealing physical goods from a supply chain" }, correct: "b" }
+                ]
+            },
+            3: {
+                title: "Quiz 3: Data Protection & Privacy",
+                category: "Data Privacy",
+                questions: [
+                    { question: "1. What is the purpose of data encryption?", options: { a: "To compress data for storage", b: "To make data unreadable without a key", c: "To speed up data transfer", d: "To organize data efficiently" }, correct: "b" },
+                    { question: "2. Which principle ensures that only authorized users can access data?", options: { a: "Integrity", b: "Availability", c: "Confidentiality", d: "Non-repudiation" }, correct: "c" },
+                    { question: "3. What is the best practice for backing up critical files?", options: { a: "Store them only on your computer's hard drive", b: "Back up to an external drive and a secure cloud service", c: "Email them to yourself", d: "Only back up once a year" }, correct: "b" },
+                    { question: "4. What is a 'VPN' primarily used for?", options: { a: "To increase internet speed", b: "To bypass website restrictions", c: "To create a secure, encrypted connection over public networks", d: "To block advertisements" }, correct: "c" },
+                    { question: "5. What is 'Privacy by Design'?", options: { a: "Adding privacy features after a product is launched", b: "Integrating privacy considerations throughout the entire development process", c: "A marketing strategy for privacy-focused products", d: "Only collecting data that is legally required" }, correct: "b" },
+                    { question: "6. What does 'GDPR' stand for?", options: { a: "General Data Protection Regulation", b: "Global Data Privacy Rights", c: "Government Data Protection Rules", d: "General Digital Privacy Requirements" }, correct: "a" },
+                    { question: "7. Why is it important to use different passwords for different accounts?", options: { a: "To make them easier to remember", b: "To prevent 'credential stuffing' attacks", c: "To share with friends", d: "It's not important" }, correct: "b" },
+                    { question: "8. What is the 'right to be forgotten' in data privacy?", options: { a: "The right to forget your password", b: "The right to have personal data erased under certain conditions", c: "The right to forget about data breaches", d: "The right to not share any personal data" }, correct: "b" },
+                    { question: "9. What is 'data anonymization'?", options: { a: "Making data public", b: "Removing personally identifiable information from data", c: "Encrypting data", d: "Storing data in a secret location" }, correct: "b" },
+                    { question: "10. What is 'data integrity'?", options: { a: "Ensuring data is only accessible to authorized users", b: "Ensuring data is accurate and consistent over its lifecycle", c: "Ensuring data is always available", d: "Ensuring data is stored securely" }, correct: "b" }
+                ]
+            },
+            4: {
+                title: "Quiz 4: Network Security",
+                category: "Networking",
+                questions: [
+                    { question: "1. What is the primary function of a router in a network?", options: { a: "To block viruses", b: "To connect different networks and direct data traffic", c: "To store files", d: "To provide Wi-Fi" }, correct: "b" },
+                    { question: "2. Which protocol is used for secure web browsing?", options: { a: "HTTP", b: "FTP", c: "HTTPS", d: "SMTP" }, correct: "c" },
+                    { question: "3. What is a 'port scan'?", options: { a: "Scanning for open physical ports on a computer", b: "Scanning a network for open communication ports on devices", c: "Scanning for USB devices", d: "Scanning for network cables" }, correct: "b" },
+                    { question: "4. What is 'Wi-Fi Protected Access (WPA3)'?", options: { a: "An old, insecure Wi-Fi security standard", b: "The latest and most secure Wi-Fi encryption standard", c: "A type of public Wi-Fi", d: "A tool for hacking Wi-Fi" }, correct: "b" },
+                    { question: "5. What is the purpose of an 'Intrusion Detection System (IDS)'?", options: { a: "To prevent all network attacks", b: "To monitor network traffic for suspicious activity and alert administrators", c: "To encrypt network data", d: "To manage network users" }, correct: "b" },
+                    { question: "6. What is a 'Denial of Service (DoS)' attack?", options: { a: "An attack that steals user data", b: "An attack that makes a service unavailable by overwhelming it with traffic", c: "An attack that installs malware", d: "An attack that modifies network configurations" }, correct: "b" },
+                    { question: "7. Which layer of the OSI model is responsible for logical addressing (IP addresses)?", options: { a: "Physical Layer", b: "Data Link Layer", c: "Network Layer", d: "Transport Layer" }, correct: "c" },
+                    { question: "8. What is 'MAC address filtering'?", options: { a: "Filtering based on IP addresses", b: "Allowing or blocking network access based on device hardware addresses", c: "Filtering based on website content", d: "Filtering based on user names" }, correct: "b" },
+                    { question: "9. What is the role of a 'Proxy Server' in network security?", options: { a: "To directly connect to the internet", b: "To act as an intermediary for requests from clients seeking resources from other servers", c: "To store all network data", d: "To manage Wi-Fi connections" }, correct: "b" },
+                    { question: "10. What is 'SSID broadcasting'?", options: { a: "Hiding your Wi-Fi network name", b: "Making your Wi-Fi network name visible to everyone", c: "Encrypting your Wi-Fi signal", d: "Changing your Wi-Fi password" }, correct: "b" }
+                ]
+            },
+            5: {
+                title: "Quiz 5: Web Security",
+                category: "Web Security",
+                questions: [
+                    { question: "1. What is 'Cross-Site Scripting (XSS)'?", options: { a: "Injecting malicious scripts into web pages viewed by other users", b: "Injecting SQL commands into a database", c: "Stealing user credentials from a server", d: "Overloading a web server with requests" }, correct: "a" },
+                    { question: "2. What is 'SQL Injection'?", options: { a: "Injecting malicious code into web forms to manipulate a database", b: "Injecting scripts into web pages", c: "Injecting viruses into downloaded files", d: "Injecting advertisements into websites" }, correct: "a" },
+                    { question: "3. What is the purpose of a 'Content Security Policy (CSP)'?", options: { a: "To manage website content", b: "To prevent certain types of web attacks like XSS and data injection", c: "To ensure website accessibility", d: "To speed up website loading" }, correct: "b" },
+                    { question: "4. What does 'CSRF' stand for?", options: { a: "Cross-Site Request Forgery", b: "Client-Side Request Failure", c: "Content Security Request Form", d: "Cyber Security Response Framework" }, correct: "a" },
+                    { question: "5. Why should you clear your browser cache and cookies regularly?", options: { a: "To make websites load faster", b: "To remove tracking data and improve privacy", c: "To free up disk space", d: "To update your browser" }, correct: "b" },
+                    { question: "6. What is the significance of the padlock icon in a browser's address bar?", options: { a: "It means the website is safe from all attacks", b: "It indicates a secure HTTPS connection", c: "It means the website is popular", d: "It indicates the website has no ads" }, correct: "b" },
+                    { question: "7. What is 'Clickjacking'?", options: { a: "Stealing mouse clicks", b: "Tricking users into clicking on something different from what they perceive", c: "Hijacking a user's browser", d: "Clicking on ads for profit" }, correct: "b" },
+                    { question: "8. What is a 'Web Application Firewall (WAF)'?", options: { a: "A firewall for your home network", b: "A security solution that protects web applications from various attacks", c: "A firewall for mobile apps", d: "A tool for web development" }, correct: "b" },
+                    { question: "9. What is the risk of using outdated web plugins (e.g., Flash, Java applets)?", options: { a: "Slower browsing experience", b: "Increased risk of security vulnerabilities and malware infection", c: "Websites may not display correctly", d: "Higher data usage" }, correct: "b" },
+                    { question: "10. What is 'Session Hijacking'?", options: { a: "Stealing a user's browser session to gain unauthorized access", b: "Taking control of a user's computer", c: "Blocking a user's internet access", d: "Intercepting user passwords" }, correct: "a" }
+                ]
+            }
+        };
+
+        const MODULES_CONTENT = {
+            1: {
+                title: "Module 1: Phishing Awareness Basics",
+                category: "Phishing",
+                content: `
+                    <h3>What is Phishing?</h3>
+                    <p>Phishing is a type of cybercrime where attackers attempt to trick individuals into revealing sensitive information, such as usernames, passwords, credit card details, or other personal data. They often do this by disguising themselves as a trustworthy entity in an electronic communication.</p>
+                    <h3>Common Phishing Tactics:</h3>
+                    <ul>
+                        <li><strong>Spoofed Emails/Messages:</strong> Emails or texts that appear to come from legitimate organizations (banks, social media, government agencies, delivery services) but are fake.</li>
+                        <li><strong>Urgency & Threats:</strong> Messages that create a sense of urgency, threatening account closure, legal action, or loss of access if you don't act immediately.</li>
+                        <li><strong>Generic Greetings:</strong> Often use generic greetings like "Dear Customer" instead of your name.</li>
+                        <li><strong>Suspicious Links:</strong> Links that look legitimate but point to malicious websites. Always hover over links to see the true URL before clicking!</li>
+                        <li><strong>Malicious Attachments:</strong> Files (like invoices, resumes, or shipping labels) that contain malware.</li>
+                    </ul>
+                    <h3>How to Protect Yourself:</h3>
+                    <ol>
+                        <li><strong>Verify the Sender:</strong> Check the sender's email address carefully. Look for misspellings or unusual domains.</li>
+                        <li><strong>Hover Over Links:</strong> Before clicking, hover your mouse over any link to see the actual URL in the bottom-left corner of your browser. If it looks suspicious, don't click.</li>
+                        <li><strong>Don't Open Attachments from Unknown Senders:</strong> If you're not expecting an attachment, be extremely cautious.</li>
+                        <li><strong>Use Strong, Unique Passwords & 2FA:</strong> Even if you fall for a phishing scam, 2FA can prevent account compromise.</li>
+                        <li><strong>Report Suspicious Emails:</strong> Most email providers have a "Report Phishing" or "Report Spam" button.</li>
+                    </ol>
+                    <p>Remember: If something feels off, it probably is. When in doubt, contact the organization directly using a known, legitimate phone number or website, NOT the one provided in the suspicious message.</p>
+                `,
+                assessment: [
+                    { question: "1. What is the main goal of a phishing attack?", options: { a: "To install antivirus software", b: "To trick users into revealing sensitive information", c: "To speed up your internet", d: "To organize your files" }, correct: "b" },
+                    { question: "2. What should you do before clicking a link in a suspicious email?", options: { a: "Click it quickly", b: "Hover over it to see the actual URL", c: "Forward it to all your contacts", d: "Reply asking for verification" }, correct: "b" },
+                    { question: "3. Phishing emails often create a sense of:", options: { a: "Calm", b: "Urgency", c: "Happiness", d: "Boredom" }, correct: "b" }
+                ]
+            },
+            2: {
+                title: "Module 2: Strong Password & 2FA",
+                category: "Passwords",
+                content: `
+                    <h3>The Power of Strong Passwords</h3>
+                    <p>Your password is the first line of defense for your online accounts. A strong password makes it significantly harder for cybercriminals to gain unauthorized access.</p>
+                    <h3>Characteristics of a Strong Password:</h3>
+                    <ul>
+                        <li><strong>Length:</strong> Aim for at least 12-16 characters. Longer is always better.</li>
+                        <li><strong>Complexity:</strong> Include a mix of uppercase letters (A-Z), lowercase letters (a-z), numbers (0-9), and symbols (!@#$%^&*).</li>
+                        <li><strong>Uniqueness:</strong> Never reuse passwords across different accounts. If one account is breached, all others using the same password are at risk.</li>
+                        <li><strong>Unpredictability:</strong> Avoid personal information (birthdays, names), common words, keyboard patterns (qwerty), or simple sequences.</li>
+                    </ul>
+                    <h3>Password Managers: Your Best Friend</h3>
+                    <p>It's impossible to remember dozens of complex, unique passwords. This is where password managers come in. They are secure applications that:</p>
+                    <ul>
+                        <li>Generate strong, random passwords for you.</li>
+                        <li>Store all your passwords securely in an encrypted vault, protected by one master password.</li>
+                        <li>Automatically fill in login credentials for websites and apps.</li>
+                    </ul>
+                    <p>Popular options include LastPass, Bitwarden, 1Password, and Dashlane.</p>
+                    <h3>Two-Factor Authentication (2FA) / Multi-Factor Authentication (MFA)</h3>
+                    <p>2FA adds an essential layer of security beyond just a password. Even if an attacker steals your password, they can't access your account without the second factor.</p>
+                    <h3>Common 2FA Methods:</h3>
+                    <ul>
+                        <li><strong>SMS Codes:</strong> A code sent to your phone via text message (less secure, but better than nothing).</li>
+                        <li><strong>Authenticator Apps:</strong> Apps like Google Authenticator or Authy generate time-based codes (more secure).</li>
+                        <li><strong>Hardware Security Keys:</strong> Physical devices (like YubiKey) that plug into your computer or connect via NFC (most secure).</li>
+                        <li><strong>Biometrics:</strong> Fingerprint or facial recognition.</li>
+                    </ul>
+                    <p><strong>Always enable 2FA/MFA wherever it's available!</strong> It's a simple step that significantly boosts your security.</p>
+                `,
+                assessment: [
+                    { question: "1. What is the recommended minimum length for a strong password?", options: { a: "6 characters", b: "8 characters", c: "12-16 characters", d: "Any length" }, correct: "c" },
+                    { question: "2. Why should you avoid reusing passwords?", options: { a: "It's harder to remember", b: "If one account is breached, others are vulnerable", c: "It slows down your computer", d: "It's against the rules" }, correct: "b" },
+                    { question: "3. What does 2FA add to your account security?", options: { a: "A faster login", b: "An extra layer of verification beyond the password", c: "A way to recover lost passwords", d: "A new username" }, correct: "b" }
+                ]
+            },
+            3: {
+                title: "Module 3: Understanding Malware Types",
+                category: "Malware",
+                content: `
+                    <h3>What is Malware?</h3>
+                    <p>Malware is a blanket term for malicious software designed to disrupt, damage, or gain unauthorized access to a computer system. It comes in many forms, each with its own specific way of operating.</p>
+                    <h3>Common Types of Malware:</h3>
+                    <ul>
+                        <li><strong>Viruses:</strong> Self-replicating programs that attach themselves to legitimate programs and spread when those programs are executed. They often damage files or disrupt system operations.</li>
+                        <li><strong>Worms:</strong> Self-replicating malware that spreads across networks without needing a host program or human interaction. They can consume bandwidth and cause network slowdowns.</li>
+                        <li><strong>Trojans (Trojan Horse):</strong> Malware disguised as legitimate software. Users unknowingly install them, and once inside, they can create backdoors, steal data, or download other malware. Unlike viruses/worms, they don't self-replicate.</li>
+                        <li><strong>Ransomware:</strong> Encrypts a victim's files and demands a ransom payment (usually in cryptocurrency) for their decryption. If the ransom isn't paid, the files may be permanently lost.</li>
+                        <li><strong>Spyware:</strong> Secretly monitors and collects information about a user's activities (e.g., browsing history, keystrokes, personal data) without their knowledge.</li>
+                        <li><strong>Adware:</strong> Automatically delivers unwanted advertisements to the user's screen, often through pop-ups or by modifying browser settings.</li>
+                        <li><strong>Rootkits:</strong> A stealthy type of malware that hides its presence and the presence of other malicious software on a system, making it difficult to detect and remove.</li>
+                        <li><strong>Keyloggers:</strong> A type of spyware that records every keystroke made on a computer, often used to steal passwords and other sensitive information.</li>
+                    </ul>
+                    <h3>How Malware Spreads:</h3>
+                    <ul>
+                        <li>Malicious email attachments</li>
+                        <li>Infected websites (drive-by downloads)</li>
+                        <li>Malicious ads (malvertising)</li>
+                        <li>Infected USB drives</li>
+                        <li>Bundled with legitimate software downloads</li>
+                        <li>Exploiting software vulnerabilities</li>
+                    </ul>
+                    <h3>Protection:</h3>
+                    <p>Use reputable antivirus/anti-malware software, keep all software updated, be cautious with downloads and email attachments, and use a firewall.</p>
+                `,
+                assessment: [
+                    { question: "1. Which type of malware encrypts files and demands payment?", options: { a: "Spyware", b: "Ransomware", c: "Adware", d: "Worm" }, correct: "b" },
+                    { question: "2. What is a Trojan Horse disguised as?", options: { a: "A virus", b: "Legitimate software", c: "A network attack", d: "An operating system" }, correct: "b" },
+                    { question: "3. Which malware records keystrokes?", options: { a: "Rootkit", b: "Adware", c: "Keylogger", d: "Virus" }, correct: "c" }
+                ]
+            },
+            4: {
+                title: "Module 4: Secure Browsing & Downloads",
+                category: "Web Security",
+                content: `
+                    <h3>Browsing the Web Securely</h3>
+                    <p>The internet is a vast resource, but it also harbors risks. Secure browsing habits are crucial to protect your data and devices.</p>
+                    <h3>Key Practices for Secure Browsing:</h3>
+                    <ul>
+                        <li><strong>Look for HTTPS:</strong> Always check that websites you visit, especially those where you enter personal information (banking, shopping, email), use "HTTPS" in the URL and display a padlock icon. This means the connection is encrypted.</li>
+                        <li><strong>Beware of Pop-ups & Redirects:</strong> Close unexpected pop-up windows immediately. If you're redirected to a suspicious site, close the tab.</li>
+                        <li><strong>Use a Reputable Browser:</strong> Keep your web browser (Chrome, Firefox, Edge, Safari) updated to the latest version. Browsers frequently release security patches.</li>
+                        <li><strong>Browser Extensions:</strong> Be selective about browser extensions. Only install extensions from official stores and reputable developers, as they can access your browsing data.</li>
+                        <li><strong>Clear Cache & Cookies:</strong> Regularly clear your browser's cache and cookies to remove tracking data and potentially harmful stored information.</li>
+                        <li><strong>Public Wi-Fi Caution:</strong> Public Wi-Fi is often unsecured. Avoid accessing sensitive accounts. Use a VPN to encrypt your traffic if you must use public Wi-Fi.</li>
+                    </ul>
+                    <h3>Safe Downloads:</h3>
+                    <p>Downloading files from the internet is a common activity, but it's also a primary way malware spreads.</p>
+                    <h3>Tips for Safe Downloads:</h3>
+                    <ul>
+                        <li><strong>Official Sources Only:</strong> Download software, apps, and files only from official websites or reputable app stores. Avoid third-party download sites that might bundle malware.</li>
+                        <li><strong>Read Reviews:</strong> Before downloading, check reviews and ratings, especially for less-known software.</li>
+                        <li><strong>Scan Downloads:</strong> Use your antivirus software to scan any downloaded files before opening them.</li>
+                        <li><strong>Check File Extensions:</strong> Be suspicious of unusual file extensions (e.g., \`.exe.zip\`, \`.scr\`). Attackers often try to hide executable files.</li>
+                        <li><strong>Beware of Pirated Content:</strong> Illegally downloaded software, movies, or music are common vectors for malware.</li>
+                    </ul>
+                    <p>By adopting these habits, you can significantly reduce your risk of encountering web-based threats.</p>
+                `,
+                assessment: [
+                    { question: "1. What does 'HTTPS' in a website address indicate?", options: { a: "It's a fast website", b: "It's a secure, encrypted connection", c: "It's a social media site", d: "It has no ads" }, correct: "b" },
+                    { question: "2. Why should you be cautious with browser extensions?", options: { a: "They slow down your computer", b: "They can access your browsing data", c: "They cost money", d: "They are hard to install" }, correct: "b" },
+                    { question: "3. What is the safest source for downloading software?", options: { a: "Third-party download sites", b: "Email attachments", c: "Official websites or reputable app stores", d: "Torrent sites" }, correct: "c" }
+                ]
+            },
+            5: {
+                title: "Module 5: Social Engineering Tactics",
+                category: "Social Engineering",
+                content: `
+                    <h3>What is Social Engineering?</h3>
+                    <p>Social engineering is the psychological manipulation of people into performing actions or divulging confidential information. It's often the human element that is the weakest link in security, and social engineers exploit this.</p>
+                    <h3>Common Social Engineering Tactics:</h3>
+                    <ul>
+                        <li><strong>Pretexting:</strong> Creating a fabricated scenario (a pretext) to engage a targeted victim and extract information. E.g., impersonating IT support, a bank representative, or a colleague.</li>
+                        <li><strong>Baiting:</strong> Offering something enticing (e.g., a free music download, a USB stick labeled "Company Payroll") to trick victims into giving up their information or infecting their systems.</li>
+                        <li><strong>Quid Pro Quo:</strong> Promising a benefit in exchange for information or access. E.g., "I'll fix your internet if you give me your password."</li>
+                        <li><strong>Tailgating/Piggybacking:</strong> Gaining unauthorized access to a restricted area by following closely behind an authorized person.</li>
+                        <li><strong>Phishing/Smishing/Vishing:</strong> (As covered in Module 1) Using email, SMS, or voice calls to trick victims.</li>
+                        <li><strong>Impersonation:</strong> Pretending to be someone else (e.g., a senior executive, a vendor) to gain trust and access.</li>
+                    </ul>
+                    <h3>Why it Works:</h3>
+                    <p>Social engineers exploit human tendencies like:</p>
+                    <ul>
+                        <li><strong>Trust:</strong> People tend to trust authority figures or those who seem helpful.</li>
+                        <li><strong>Curiosity:</strong> The desire to know more can lead to clicking malicious links.</li>
+                        <li><strong>Fear/Urgency:</strong> Threats or time-sensitive demands can make people act without thinking.</li>
+                        <li><strong>Greed:</strong> Promises of rewards can lower defenses.</li>
+                    </ul>
+                    <h3>How to Defend Against Social Engineering:</h3>
+                    <ol>
+                        <li><strong>Be Skeptical:</strong> Always question unsolicited requests for information or access.</li>
+                        <li><strong>Verify Identity:</strong> If someone claims to be from an organization, verify their identity through a known, official contact method (not one they provide).</li>
+                        <li><strong>Think Before You Act:</strong> Don't rush into decisions under pressure. Take a moment to assess the situation.</li>
+                        <li><strong>Never Share Sensitive Information:</strong> Be extremely cautious about sharing passwords, PINs, or other confidential data.</li>
+                        <li><strong>Report Suspicious Activity:</strong> Inform your IT department or relevant authorities about any suspicious attempts.</li>
+                    </ol>
+                    <p>Remember, technology can protect against technical attacks, but human awareness is your best defense against social engineering.</p>
+                `,
+                assessment: [
+                    { question: "1. What is the primary goal of social engineering?", options: { a: "To build social networks", b: "To manipulate people into revealing information or performing actions", c: "To design user-friendly software", d: "To improve communication skills" }, correct: "b" },
+                    { question: "2. Which tactic involves creating a fake scenario to extract information?", options: { a: "Baiting", b: "Quid Pro Quo", c: "Pretexting", d: "Tailgating" }, correct: "c" },
+                    { question: "3. If someone asks for your password over the phone, what should you do?", options: { a: "Give it to them if they sound official", b: "Ask for their name and call them back on an official number", c: "Tell them you don't have one", d: "Give them a fake password" }, correct: "b" }
+                ]
+            },
+            6: {
+                title: "Module 6: Data Backup & Recovery",
+                category: "Data Privacy",
+                content: `
+                    <h3>The Importance of Data Backup</h3>
+                    <p>Your digital life is filled with important documents, precious photos, financial records, and more. Losing this data due to hardware failure, accidental deletion, cyberattack (like ransomware), or natural disaster can be devastating. Data backup is your insurance policy.</p>
+                    <h3>The 3-2-1 Backup Rule:</h3>
+                    <p>This is a widely recommended strategy for robust data protection:</p>
+                    <ul>
+                        <li><strong>3 Copies of Your Data:</strong> Keep one primary copy and two backups.</li>
+                        <li><strong>2 Different Media Types:</strong> Store your backups on at least two different types of storage media (e.g., internal hard drive, external hard drive, cloud storage). This protects against a single point of failure.</li>
+                        <li><strong>1 Offsite Copy:</strong> At least one copy of your backup should be stored in a different physical location (e.g., cloud, a friend's house, a safe deposit box). This protects against local disasters like fire or flood.</li>
+                    </ul>
+                    <h3>Common Backup Methods:</h3>
+                    <ul>
+                        <li><strong>External Hard Drives:</strong> Simple, relatively inexpensive, and good for local backups. Remember to disconnect them after backup to protect against ransomware.</li>
+                        <li><strong>Cloud Storage:</strong> Services like Google Drive, Dropbox, OneDrive, or specialized backup services (Backblaze, Carbonite) offer offsite storage and often automated backups.</li>
+                        <li><strong>Network Attached Storage (NAS):</strong> A dedicated device on your home network for centralized storage and backup.</li>
+                        <li><strong>Operating System Backup Tools:</strong> Windows Backup and Restore, macOS Time Machine.</li>
+                    </ul>
+                    <h3>Key Backup Practices:</h3>
+                    <ul>
+                        <li><strong>Automate Backups:</strong> Set up automatic backups whenever possible to ensure consistency.</li>
+                        <li><strong>Regularly Test Restores:</strong> Periodically practice restoring files from your backups to ensure they are working correctly and the data is intact.</li>
+                        <li><strong>Encrypt Backups:</strong> Especially for cloud or offsite backups, ensure your data is encrypted to protect its confidentiality.</li>
+                        <li><strong>Identify Critical Data:</strong> Know what data is most important to you and prioritize its backup.</li>
+                    </ul>
+                    <h3>Data Recovery:</h3>
+                    <p>If data loss occurs, having a recent, tested backup is the fastest and most reliable way to recover. Without backups, data recovery can be expensive, time-consuming, and not always successful.</p>
+                `,
+                assessment: [
+                    { question: "1. What is the 3-2-1 backup rule?", options: { a: "3 copies, 2 media types, 1 offsite copy", b: "3 backups, 2 times a day, 1 cloud", c: "3 users, 2 devices, 1 password", d: "3 folders, 2 files, 1 backup" }, correct: "a" },
+                    { question: "2. Why should you store at least one backup copy offsite?", options: { a: "To save space on your computer", b: "To protect against local disasters like fire or flood", c: "To share with friends", d: "To make it easier to access" }, correct: "b" },
+                    { question: "3. What is a crucial step after performing a backup?", options: { a: "Delete the original files", b: "Share the backup with others", c: "Regularly test restoring files from the backup", d: "Forget about it" }, correct: "c" }
+                ]
+            }
+        };
+
+        const CTF_CHALLENGES = {
+            1: {
+                title: "CTF 1: Phishing Email Analysis",
+                category: "Phishing",
+                scenario: "You receive an email that looks like it's from your bank, asking you to update your account details due to 'suspicious activity'. The email sender is 'support@mybank-security.com' and there's a link that says 'Click here to verify'. The email also has a very generic greeting like 'Dear Customer'.",
+                questions: [
+                    {
+                        question_text: "What is the biggest red flag in this email?",
+                        options: {
+                            a: "The urgent tone asking for immediate action",
+                            b: "The sender's email address (mybank-security.com)",
+                            c: "The generic greeting 'Dear Customer'",
+                            d: "The request to update account details via a link"
+                        },
+                        correct: "b",
+                        explanation: "The domain 'mybank-security.com' is suspicious. Legitimate banks will use their official domain (e.g., 'mybank.com'). Phishers often use similar-looking domains to trick you."
+                    }
+                ]
+            },
+            2: {
+                title: "CTF 2: Malware Behavior Spotting",
+                category: "Malware",
+                scenario: "Your computer suddenly starts running very slowly, new browser toolbars appear that you didn't install, and strange pop-up ads frequently show up, even when you're not browsing. You also notice your internet data usage has spiked. You also find that your antivirus software has been mysteriously disabled.",
+                questions: [
+                    {
+                        question_text: "What type of malware is most likely causing these symptoms?",
+                        options: {
+                            a: "Ransomware",
+                            b: "Rootkit",
+                            c: "Adware/Spyware/Trojan (with disabled AV)",
+                            d: "Worm"
+                        },
+                        correct: "c",
+                        explanation: "Slow performance, unwanted toolbars, pop-up ads, increased data usage, and disabled antivirus are classic symptoms of Adware (for ads), Spyware (for monitoring), and Trojans (which can disable security software to hide their presence)."
+                    }
+                ]
+            },
+            3: {
+                title: "CTF 3: Website Vulnerability Identification",
+                category: "Web Security",
+                scenario: "You are visiting an online forum. In the comment section, you notice that if you type `<script>alert('XSS Test');<script>` and submit it, an alert box pops up for *other users* viewing your comment. The website also doesn't force HTTPS.",
+                questions: [
+                    {
+                        question_text: "What common web vulnerability does the script injection indicate?",
+                        options: {
+                            a: "SQL Injection",
+                            b: "Cross-Site Scripting (XSS)",
+                            c: "Denial of Service (DoS)",
+                            d: "Broken Authentication"
+                        },
+                        correct: "b",
+                        explanation: "The ability to inject client-side scripts (like `alert()`) into web pages viewed by other users is a classic sign of a Cross-Site Scripting (XSS) vulnerability. The lack of HTTPS is also a red flag for overall security."
+                    }
+                ]
+            },
+            4: {
+                title: "CTF 4: Social Engineering Call",
+                category: "Social Engineering",
+                scenario: "You receive a phone call from someone claiming to be from your internet service provider (ISP). They say there's a critical issue with your connection and ask you to download a 'diagnostic tool' from a link they'll send to your phone via text message, and then provide them with the installation code.",
+                questions: [
+                    {
+                        question_text: "What is the biggest red flag in this scenario?",
+                        options: {
+                            a: "They called you instead of you calling them",
+                            b: "They are asking you to download software from a link they send",
+                            c: "They mentioned a 'critical issue'",
+                            d: "They are from your ISP"
+                        },
+                        correct: "b",
+                        explanation: "Legitimate companies rarely ask you to download software from a link sent via text/email during an unsolicited call. This is a common social engineering tactic to install malware. Always verify by calling the official support number yourself."
+                    }
+                ]
+            },
+            5: {
+                title: "CTF 5: Suspicious USB Drive",
+                category: "Physical Security",
+                scenario: "You find a USB drive labeled 'Confidential Company Data' in the parking lot outside your office. You pick it up and consider plugging it into your work computer to see who it belongs to and return it.",
+                questions: [
+                    {
+                        question_text: "What is the primary cybersecurity risk of plugging in this USB drive?",
+                        options: {
+                            a: "It might be empty",
+                            b: "It could contain malware that automatically infects your computer",
+                            c: "It might be too slow to read files",
+                            d: "It could overwrite your existing files"
+                        },
+                        correct: "b",
+                        explanation: "This is a classic 'USB drop' attack. Malicious USB drives can be pre-loaded with malware that auto-runs or exploits vulnerabilities when plugged in, infecting your system. Never plug in unknown USB drives."
+                    }
+                ]
+            }
+        };
+
+        // Skill categories for the matrix
+        const SKILL_CATEGORIES = [
+            "Phishing", "Passwords", "Malware", "Networking", "Data Privacy", "Web Security", "Social Engineering", "Physical Security"
+        ];
+
+        // --- Global Variables for Application State ---
+        let sessionStartTime = Date.now();
+        let sessionTimerInterval;
+        let skillMatrixChartInstance = null; // To hold the Chart.js instance
+        let currentQuiz = null;
+        let currentQuestionIndex = 0;
+        let quizScore = 0;
+        let quizAnswers = []; // To store user's answers for feedback
+        let currentCTF = null;
+        let currentModuleId = null; // To track which module is currently being viewed/assessed
+
+        // --- Core Application Flow Management ---
+        function initApp() {
+            applySavedTheme();
+            const loggedInUser = localStorage.getItem('loggedInUser');
+
+            if (loggedInUser) {
+                showSection('dashboard-section'); // Show dashboard first so elements are in DOM
+                loadUserDashboard(loggedInUser); // Then load content into visible elements
+            } else {
+                showSection('login-section');
+            }
+
+            // Add event listener for checklist items to update progress immediately
+            // This needs to be done after dashboard-section is potentially shown and its elements exist
+            const hygieneForm = document.getElementById('hygiene-form');
+            if (hygieneForm) {
+                const checklistItems = hygieneForm.querySelectorAll('input[type="checkbox"]');
+                checklistItems.forEach(item => {
+                    item.addEventListener('change', updateProgress);
+                });
+            }
+
+            // Create and append dark/light mode toggle button
+            const toggleButton = document.createElement('button');
+            toggleButton.textContent = '🌓G2 Mode';
+            toggleButton.onclick = toggleDarkMode;
+            toggleButton.style.position = 'fixed';
+            toggleButton.style.bottom = '20px';
+            toggleButton.style.right = '20px';
+            toggleButton.style.zIndex = '1000';
+            toggleButton.classList.add('toggle-mode-button');
+            document.body.appendChild(toggleButton);
+
+            window.addEventListener('resize', resizeConfettiCanvas);
+        }
+
+        function showSection(sectionId) {
+            // Hide all main sections first
+            document.getElementById('login-section').style.display = 'none';
+            document.getElementById('dashboard-section').style.display = 'none';
+            document.getElementById('module-content-section').style.display = 'none';
+
+            // Show the requested section
+            const targetSection = document.getElementById(sectionId);
+            if (targetSection) {
+                if (sectionId === 'login-section') {
+                    targetSection.style.display = 'block'; // Login is a simple block
+                } else {
+                    targetSection.style.display = 'flex'; // Dashboard and Module use flex for layout
+                }
+            }
+        }
+
+        function showDashboardTab(tabId) {
+            // Hide all dashboard tabs
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.style.display = 'none';
+                tab.classList.remove('active-tab');
+            });
+
+            // Deactivate all navigation buttons
+            document.querySelectorAll('.nav-button').forEach(button => {
+                button.classList.remove('active');
+            });
+
+            // Show the selected dashboard tab
+            const selectedTab = document.getElementById(tabId);
+            if (selectedTab) {
+                selectedTab.style.display = 'block';
+                selectedTab.classList.add('active-tab');
+
+                // Activate the corresponding navigation button
+                const activeButton = document.querySelector(`.nav-button[onclick="showDashboardTab('${tabId}')"]`);
+                if (activeButton) {
+                    activeButton.classList.add('active');
+                }
+                // Special actions for specific tabs
+                if (tabId === 'stats') {
+                    renderSkillMatrix(localStorage.getItem('loggedInUser'));
+                }
+                // Ensure quiz/ctf areas are hidden when switching tabs away from them
+                if (tabId !== 'quizzes') {
+                    const quizArea = document.getElementById('quiz-area');
+                    if (quizArea) quizArea.style.display = 'none';
+                }
+                if (tabId !== 'ctf') {
+                    const ctfArea = document.getElementById('ctf-area');
+                    if (ctfArea) ctfArea.style.display = 'none';
+                }
+            }
+        }
+
+        // --- Utility Functions ---
+
+        // Function to toggle dark/light mode
+        function toggleDarkMode() {
+            const body = document.body;
+            body.classList.toggle('dark-mode');
+            localStorage.setItem('theme', body.classList.contains('dark-mode') ? 'dark' : 'light');
+            updateSkillMatrixChartTheme(); // Update chart theme on mode change
+        }
+
+        // Apply saved theme on page load
+        function applySavedTheme() {
+            const savedTheme = localStorage.getItem('theme');
+            if (savedTheme === 'dark') {
+                document.body.classList.add('dark-mode');
+            } else {
+                document.body.classList.remove('dark-mode');
+            }
+        }
+
+        // Function to show feedback messages
+        function showFeedback(elementId, message, isSuccess = true) {
+            const element = document.getElementById(elementId);
+            if (element) {
+                element.textContent = message;
+                element.style.color = isSuccess ? 'var(--success-color)' : 'var(--error-color)';
+                element.style.display = 'block';
+                setTimeout(() => {
+                    element.textContent = '';
+                    element.style.display = 'none';
+                }, 3000);
+            }
+        }
+
+        // --- Login Page Functions ---
+        function checkPasswordStrength() {
+            const passwordInput = document.getElementById('password');
+            const strengthBar = document.getElementById('strength-level');
+            const strengthText = document.getElementById('strength-text');
+            const password = passwordInput.value;
+
+            let strength = 0;
+            if (password.length >= 10) strength += 1; // Increased minimum length for strong
+            if (password.match(/[a-z]/) && password.match(/[A-Z]/)) strength += 1;
+            if (password.match(/\d/)) strength += 1;
+            if (password.match(/[^a-zA-Z0-9]/)) strength += 1;
+
+            let barColor = 'red';
+            let text = 'Very Weak';
+
+            switch (strength) {
+                case 0:
+                case 1:
+                    strengthBar.style.width = '25%';
+                    barColor = 'red';
+                    text = 'Very Weak 🤬';
+                    break;
+                case 2:
+                    strengthBar.style.width = '50%';
+                    barColor = 'orange';
+                    text = 'Moderate 😒';
+                    break;
+                case 3:
+                    strengthBar.style.width = '75%';
+                    barColor = 'yellowgreen';
+                    text = 'Good 😁';
+                    break;
+                case 4:
+                    strengthBar.style.width = '100%';
+                    barColor = 'green';
+                    text = 'Strong 😂';
+                    break;
+            }
+
+            strengthBar.style.backgroundColor = barColor;
+            strengthText.textContent = text;
+            strengthText.style.color = barColor;
+        }
+
+        function handleLogin(event) {
+            event.preventDefault();
+
+            const usernameInput = document.getElementById('username');
+            const passwordInput = document.getElementById('password');
+
+            const username = usernameInput.value.trim();
+            const password = passwordInput.value.trim();
+
+            if (username === '' || password === '') {
+                showCustomAlert('Please enter both username and password.');
+                return;
+            }
+
+            if (password.length < 10) { // Updated minimum length for login
+                showCustomAlert('Password must be at least 10 characters long.');
+                return;
+            }
+
+            // Assign a random avatar if not already set for this user
+            let userProfile = JSON.parse(localStorage.getItem(`userProfile_${username}`)) || {};
+            if (!userProfile.avatar) {
+                userProfile.avatar = AVATAR_URLS[Math.floor(Math.random() * AVATAR_URLS.length)];
+            }
+            localStorage.setItem(`userProfile_${username}`, JSON.stringify(userProfile));
+
+            localStorage.setItem('loggedInUser', username);
+            showSection('dashboard-section'); // Show dashboard first
+            loadUserDashboard(username); // Then load content
+        }
+
+        // --- Dashboard Page Functions ---
+
+        function loadUserDashboard(loggedInUser) {
+            // Start session timer
+            startSessionTimer();
+
+            // Update username and avatar in sidebar and main dashboard greeting
+            const userProfile = JSON.parse(localStorage.getItem(`userProfile_${loggedInUser}`)) || {};
+            const avatarUrl = userProfile.avatar || AVATAR_URLS[0]; // Fallback to first avatar if none
+
+            const userAvatar = document.getElementById('user-avatar');
+            if (userAvatar) userAvatar.src = avatarUrl;
+
+            const userNameSidebars = document.querySelectorAll('#user-name-sidebar');
+            userNameSidebars.forEach(span => span.textContent = loggedInUser);
+            const userNameMains = document.querySelectorAll('#user-name-main');
+            userNameMains.forEach(span => span.textContent = loggedInUser);
+
+            loadUserPoints(loggedInUser);
+            loadChecklist(loggedInUser);
+            loadModuleProgress(loggedInUser); // This will also call renderModules
+            updateProgress();
+            updateDashboardSummary();
+            updateLeaderboard();
+            loadUserStats(loggedInUser); // Load and display user stats
+            renderSkillMatrix(loggedInUser); // Render skill matrix
+            showDashboardTab('dashboard'); // Default to dashboard tab on load
+        }
+
+        // --- Session Timer ---
+        function startSessionTimer() {
+            sessionStartTime = Date.now();
+            clearInterval(sessionTimerInterval); // Clear any existing interval
+            sessionTimerInterval = setInterval(updateSessionTimer, 1000);
+        }
+
+        function updateSessionTimer() {
+            const elapsedTime = Date.now() - sessionStartTime;
+            const seconds = Math.floor((elapsedTime / 1000) % 60);
+            const minutes = Math.floor((elapsedTime / (1000 * 60)) % 60);
+            const hours = Math.floor((elapsedTime / (1000 * 60 * 60)) % 24);
+
+            const formattedTime = [
+                hours.toString().padStart(2, '0'),
+                minutes.toString().padStart(2, '0'),
+                seconds.toString().padStart(2, '0')
+            ].join(':');
+
+            const timerDisplay = document.getElementById('session-timer-display');
+            if (timerDisplay) {
+                timerDisplay.textContent = formattedTime;
+            }
+        }
+
+        // --- User Points Management ---
+        function getUserPoints(username) {
+            let userPointsData = JSON.parse(localStorage.getItem(`userPoints_${username}`)) || { points: 0 };
+            return userPointsData.points;
+        }
+
+        function saveUserPoints(username, points) {
+            localStorage.setItem(`userPoints_${username}`, JSON.stringify({ points: points }));
+            loadUserPoints(username); // Update display immediately
+        }
+
+        function addUserPoints(username, pointsToAdd) {
+            let currentPoints = getUserPoints(username);
+            saveUserPoints(username, currentPoints + pointsToAdd);
+        }
+
+        function loadUserPoints(username) {
+            const pointsDisplay = document.getElementById('user-points-display');
+            if (pointsDisplay) {
+                pointsDisplay.textContent = getUserPoints(username);
+            }
+        }
+
+        // --- Daily Checklist ---
+        function saveChecklist() {
+            const loggedInUser = localStorage.getItem('loggedInUser');
+            if (!loggedInUser) return;
+
+            const checklist = {
+                antivirus: document.getElementById('antivirus').checked,
+                noLinks: document.getElementById('no-links').checked,
+                password: document.getElementById('password').checked,
+                backup: document.getElementById('backup').checked,
+                strongPasswords: document.getElementById('strong-passwords').checked,
+                privacySettings: document.getElementById('privacy-settings').checked,
+                vpnUsed: document.getElementById('vpn-used').checked,
+                appUpdates: document.getElementById('app-updates').checked,
+                emailSender: document.getElementById('email-sender').checked,
+                dataBreachCheck: document.getElementById('data-breach-check').checked,
+            };
+
+            localStorage.setItem(`checklist_${loggedInUser}`, JSON.stringify(checklist));
+            showFeedback('status', 'Checklist saved successfully!', true);
+
+            updateProgress();
+            updateDashboardSummary();
+        }
+
+        function loadChecklist(username) {
+            const savedChecklist = localStorage.getItem(`checklist_${username}`);
+            if (savedChecklist) {
+                const checklist = JSON.parse(savedChecklist);
+                // Ensure elements exist before trying to set checked property
+                if (document.getElementById('antivirus')) document.getElementById('antivirus').checked = checklist.antivirus;
+                if (document.getElementById('no-links')) document.getElementById('no-links').checked = checklist.noLinks;
+                if (document.getElementById('password')) document.getElementById('password').checked = checklist.password;
+                if (document.getElementById('backup')) document.getElementById('backup').checked = checklist.backup;
+                if (document.getElementById('strong-passwords')) document.getElementById('strong-passwords').checked = checklist.strongPasswords;
+                if (document.getElementById('privacy-settings')) document.getElementById('privacy-settings').checked = checklist.privacySettings;
+                if (document.getElementById('vpn-used')) document.getElementById('vpn-used').checked = checklist.vpnUsed;
+                if (document.getElementById('app-updates')) document.getElementById('app-updates').checked = checklist.appUpdates;
+                if (document.getElementById('email-sender')) document.getElementById('email-sender').checked = checklist.emailSender;
+                if (document.getElementById('data-breach-check')) document.getElementById('data-breach-check').checked = checklist.dataBreachCheck;
+            }
+        }
+
+        function updateProgress() {
+            const checklistForm = document.getElementById('hygiene-form');
+            if (!checklistForm) {
+                const completionSpan = document.getElementById('completion');
+                if (completionSpan) completionSpan.textContent = `N/A`;
+                return;
+            }
+
+            const checklistItems = checklistForm.querySelectorAll('input[type="checkbox"]');
+            let completedItems = 0;
+            checklistItems.forEach(item => {
+                if (item.checked) {
+                    completedItems++;
+                }
+            });
+
+            const completionPercentage = (checklistItems.length > 0) ? (completedItems / checklistItems.length) * 100 : 0;
+            document.getElementById('completion').textContent = `${completionPercentage.toFixed(0)}%`;
+
+            const progressElement = document.getElementById('progress');
+            if (completionPercentage === 100) {
+                progressElement.style.color = 'var(--success-color)';
+            } else {
+                progressElement.style.color = 'var(--primary-color)';
+            }
+        }
+
+        // --- Learning Modules ---
+        function loadModuleProgress(username) {
+            let moduleProgress = JSON.parse(localStorage.getItem(`moduleProgress_${username}`)) || {};
+            // Ensure all modules are initialized with their default state if not present
+            for (let i = 1; i <= Object.keys(MODULES_CONTENT).length; i++) {
+                if (moduleProgress[i] === undefined) {
+                    moduleProgress[i] = { completed: false, passedAssessment: false };
+                }
+            }
+            localStorage.setItem(`moduleProgress_${username}`, JSON.stringify(moduleProgress));
+            renderModules(username); // Call renderModules after ensuring progress is initialized
+        }
+
+        function renderModules(username) {
+            const moduleProgress = JSON.parse(localStorage.getItem(`moduleProgress_${username}`));
+            const totalModules = Object.keys(MODULES_CONTENT).length;
+
+            for (let i = 1; i <= totalModules; i++) {
+                const moduleCard = document.getElementById(`module-card-${i}`);
+                if (!moduleCard) continue;
+
+                const startBtn = moduleCard.querySelector('.start-module-btn');
+                const statusSpan = moduleCard.querySelector('.module-status');
+                const lockOverlay = moduleCard.querySelector('.lock-overlay');
+
+                // Reset display states for each card
+                startBtn.style.display = 'inline-block';
+                statusSpan.style.display = 'none';
+                if (lockOverlay) lockOverlay.style.display = 'none';
+                moduleCard.classList.remove('locked', 'completed');
+                startBtn.disabled = false;
+
+                // Check if module is completed
+                if (moduleProgress[i] && moduleProgress[i].completed && moduleProgress[i].passedAssessment) {
+                    startBtn.style.display = 'none';
+                    statusSpan.style.display = 'inline-block';
+                    moduleCard.classList.add('completed');
+                } else {
+                    // Check if previous module is completed to unlock this one
+                    // Module 1 is always unlocked
+                    if (i > 1 && !(moduleProgress[i - 1] && moduleProgress[i - 1].completed && moduleProgress[i - 1].passedAssessment)) {
+                        moduleCard.classList.add('locked');
+                        startBtn.disabled = true;
+                        if (lockOverlay) lockOverlay.style.display = 'flex';
+                    }
+                }
+            }
+        }
+
+        function startModule(moduleId) {
+            const loggedInUser = localStorage.getItem('loggedInUser');
+            const moduleProgress = JSON.parse(localStorage.getItem(`moduleProgress_${loggedInUser}`));
+
+            // Ensure the module exists and is not locked
+            if (!MODULES_CONTENT[moduleId]) {
+                showCustomAlert('Module not found!');
+                return;
+            }
+            if (moduleId > 1 && !(moduleProgress[moduleId - 1] && moduleProgress[moduleId - 1].completed && moduleProgress[moduleId - 1].passedAssessment)) {
+                showCustomAlert('Please complete the previous module and pass its assessment first to unlock this module!');
+                return;
+            }
+
+            currentModuleId = moduleId; // Set the global currentModuleId
+            showSection('module-content-section');
+            loadModuleContent();
+        }
+
+        // Module content section specific functions
+        function loadModuleContent() {
+            if (currentModuleId === null || !MODULES_CONTENT[currentModuleId]) {
+                document.getElementById('module-content-title').textContent = 'Module Not Found';
+                document.getElementById('module-text-content').innerHTML = '<p>The requested learning module could not be found.</p>';
+                document.getElementById('module-assessment-area').style.display = 'none'; // Hide assessment if module not found
+                return;
+            }
+
+            const moduleData = MODULES_CONTENT[currentModuleId];
+            document.getElementById('module-content-title').textContent = moduleData.title;
+            document.getElementById('module-text-content').innerHTML = moduleData.content;
+
+            // Show assessment after content is loaded (or after a simulated reading time)
+            setTimeout(() => {
+                document.getElementById('module-assessment-area').style.display = 'block';
+                renderModuleAssessment(currentModuleId);
+            }, 1000); // Simulate reading time before assessment appears
+
+            // Update content progress bar (simple fill for now)
+            const progressBar = document.getElementById('module-content-progress');
+            if (progressBar) {
+                progressBar.style.width = '100%'; // Assume content is "read" once loaded
+            }
+        }
+
+        function renderModuleAssessment(moduleId) {
+            const moduleData = MODULES_CONTENT[moduleId];
+            const assessmentForm = document.getElementById('module-assessment-form');
+            assessmentForm.innerHTML = '';
+
+            moduleData.assessment.forEach((q, index) => {
+                const questionDiv = document.createElement('div');
+                questionDiv.classList.add('quiz-question');
+                questionDiv.innerHTML = `<p>${q.question}</p>`;
+                for (const key in q.options) {
+                    const label = document.createElement('label');
+                    label.innerHTML = `<input type="radio" name="module-q${index}" value="${key}"> ${key}) ${q.options[key]}`;
+                    questionDiv.appendChild(label);
+                }
+                assessmentForm.appendChild(questionDiv);
+            });
+            // Ensure assessment is enabled if not already completed
+            const loggedInUser = localStorage.getItem('loggedInUser');
+            const moduleProgress = JSON.parse(localStorage.getItem(`moduleProgress_${loggedInUser}`));
+            if (moduleProgress[moduleId] && moduleProgress[moduleId].completed && moduleProgress[moduleId].passedAssessment) {
+                assessmentForm.querySelectorAll('input').forEach(input => input.disabled = true);
+                document.querySelector('#module-assessment-area button').disabled = true;
+                showFeedback('module-assessment-feedback', 'You have already completed this module!', true);
+            } else {
+                assessmentForm.querySelectorAll('input').forEach(input => input.disabled = false);
+                document.querySelector('#module-assessment-area button').disabled = false;
+            }
+        }
+
+        function submitModuleAssessment() {
+            const moduleId = currentModuleId;
+            const moduleData = MODULES_CONTENT[moduleId];
+            const assessmentFeedback = document.getElementById('module-assessment-feedback');
+            const loggedInUser = localStorage.getItem('loggedInUser');
+
+            let correctAnswers = 0;
+            const totalQuestions = moduleData.assessment.length;
+            let allAnswered = true;
+
+            moduleData.assessment.forEach((q, index) => {
+                const selectedOption = document.querySelector(`input[name="module-q${index}"]:checked`);
+                if (!selectedOption) {
+                    allAnswered = false;
+                    return;
+                }
+                if (selectedOption.value === q.correct) {
+                    correctAnswers++;
+                }
+            });
+
+            if (!allAnswered) {
+                showFeedback('module-assessment-feedback', 'Please answer all questions!', false);
+                return;
+            }
+
+            const scorePercentage = (correctAnswers / totalQuestions) * 100;
+            let feedbackMessage = '';
+            let isSuccess = false;
+
+            if (scorePercentage >= MODULE_ASSESSMENT_PASS_PERCENTAGE) {
+                feedbackMessage = `🎉 Congratulations! You passed the assessment with ${scorePercentage.toFixed(0)}%!`;
+                isSuccess = true;
+                let moduleProgress = JSON.parse(localStorage.getItem(`moduleProgress_${loggedInUser}`));
+                moduleProgress[moduleId] = { completed: true, passedAssessment: true };
+                localStorage.setItem(`moduleProgress_${loggedInUser}`, JSON.stringify(moduleProgress));
+                addUserPoints(loggedInUser, 100); // Award more points for passing module assessment
+                updateUserSkill(loggedInUser, moduleData.category, 20); // Increase skill for module category
+                showConfetti();
+
+                // Disable assessment after passing
+                document.getElementById('module-assessment-form').querySelectorAll('input').forEach(input => input.disabled = true);
+                document.querySelector('#module-assessment-area button').disabled = true;
+
+                // Redirect after a short delay to allow user to see confetti
+                setTimeout(() => {
+                    showDashboardTab('learning'); // Go back to learning modules list
+                    showSection('dashboard-section'); // Ensure dashboard is visible
+                    loadUserDashboard(loggedInUser); // Reload dashboard to update module states
+                }, 1500);
+            } else {
+                feedbackMessage = `❌ You scored ${scorePercentage.toFixed(0)}%. You need ${MODULE_ASSESSMENT_PASS_PERCENTAGE}% to pass. Please review the module content and try again.`;
+                isSuccess = false;
+                // Do not disable inputs, allow retry
+            }
+            showFeedback('module-assessment-feedback', feedbackMessage, isSuccess);
+        }
+
+
+        // --- Quizzes ---
+        function loadQuiz(quizId) {
+            currentQuiz = QUIZZES[quizId];
+            currentQuestionIndex = 0;
+            quizScore = 0;
+            quizAnswers = [];
+
+            if (!currentQuiz) {
+                showFeedback('quiz-feedback', 'Quiz not found!', false);
+                return;
+            }
+
+            document.getElementById('quiz-area').style.display = 'block';
+            document.getElementById('current-quiz-title').textContent = currentQuiz.title;
+            document.getElementById('quiz-feedback').innerHTML = ''; // Clear previous feedback
+
+            renderQuizQuestion();
+        }
+
+        function renderQuizQuestion() {
+            const quizForm = document.getElementById('current-quiz-form');
+            quizForm.innerHTML = ''; // Clear previous question
+
+            const q = currentQuiz.questions[currentQuestionIndex];
+            if (!q) {
+                // All questions rendered, proceed to submit
+                submitCurrentQuiz(true); // Auto-submit when questions run out
+                return;
+            }
+
+            const questionDiv = document.createElement('div');
+            questionDiv.classList.add('quiz-question');
+            questionDiv.innerHTML = `<p>${q.question}</p>`;
+
+            for (const key in q.options) {
+                const label = document.createElement('label');
+                label.innerHTML = `<input type="radio" name="quiz-q${currentQuestionIndex}" value="${key}"> ${key}) ${q.options[key]}`;
+                questionDiv.appendChild(label);
+            }
+            quizForm.appendChild(questionDiv);
+
+            // Re-enable submit button for the current question
+            document.querySelector('#quiz-area button[onclick="submitCurrentQuiz()"]').disabled = false;
+
+            updateQuizProgressBar();
+        }
+
+        function updateQuizProgressBar() {
+            const progressBar = document.getElementById('quiz-progress-bar');
+            const progressText = document.getElementById('quiz-progress-text');
+            const totalQuestions = currentQuiz.questions.length;
+            // Progress should show how many questions have been *attempted* or *are currently being answered*
+            const percentage = (currentQuestionIndex / totalQuestions) * 100;
+
+            progressBar.style.width = `${percentage}%`;
+            progressText.textContent = `${percentage.toFixed(0)}%`;
+        }
+
+        function submitCurrentQuiz(isAutoSubmit = false) {
+            if (!currentQuiz) return;
+
+            // Only process answer if it's not an auto-submit (i.e., user clicked submit)
+            if (!isAutoSubmit) {
+                const selectedOption = document.querySelector(`input[name="quiz-q${currentQuestionIndex}"]:checked`);
+                if (!selectedOption) {
+                    showFeedback('quiz-feedback', 'Please select an answer!', false);
+                    return;
+                }
+
+                const q = currentQuiz.questions[currentQuestionIndex];
+                const userAnswer = selectedOption.value;
+                const isCorrect = (userAnswer === q.correct);
+
+                quizAnswers.push({
+                    question: q.question,
+                    userAnswer: userAnswer,
+                    correctAnswer: q.correct,
+                    isCorrect: isCorrect,
+                    options: q.options
+                });
+
+                if (isCorrect) {
+                    quizScore++;
+                }
+
+                currentQuestionIndex++; // Move to next question index
+            }
+
+            // If there are more questions, render the next one
+            if (currentQuestionIndex < currentQuiz.questions.length) {
+                renderQuizQuestion();
+            } else {
+                // Quiz finished
+                const loggedInUser = localStorage.getItem('loggedInUser');
+                const totalQuestions = currentQuiz.questions.length;
+                const finalPercentage = (quizScore / totalQuestions) * 100;
+
+                let quizFeedbackHtml = `<h3>Quiz Completed!</h3>`;
+                quizFeedbackHtml += `<p>You scored ${quizScore} out of ${totalQuestions} (${finalPercentage.toFixed(0)}%).</p>`;
+                quizFeedbackHtml += `<h4>Your Answers:</h4>`;
+
+                quizAnswers.forEach((qa, index) => {
+                    quizFeedbackHtml += `<div class="quiz-answer-review">`;
+                    quizFeedbackHtml += `<p><strong>${index + 1}. ${qa.question}</strong></p>`;
+                    quizFeedbackHtml += `<p>Your Answer: <span class="${qa.isCorrect ? 'correct-answer' : 'incorrect-answer'}">${qa.options[qa.userAnswer]}</span></p>`;
+                    if (!qa.isCorrect) {
+                        quizFeedbackHtml += `<p>Correct Answer: <span class="correct-answer">${qa.options[qa.correctAnswer]}</span></p>`;
+                    }
+                    quizFeedbackHtml += `</div>`;
+                });
+
+                document.getElementById('quiz-feedback').innerHTML = quizFeedbackHtml;
+                document.getElementById('quiz-feedback').style.color = 'inherit'; // Reset color to default
+
+                document.getElementById('current-quiz-form').innerHTML = ''; // Clear quiz form
+                // Final update for progress bar when quiz is fully completed
+                document.getElementById('quiz-progress-bar').style.width = '100%';
+                document.getElementById('quiz-progress-text').textContent = '100%';
+
+                // Store quiz score and update points
+                let userQuizData = JSON.parse(localStorage.getItem(`quizData_${loggedInUser}`)) || { totalScore: 0, quizzesCompleted: 0 };
+                userQuizData.totalScore += quizScore;
+                userQuizData.quizzesCompleted++;
+                localStorage.setItem(`quizData_${loggedInUser}`, JSON.stringify(userQuizData));
+
+                addUserPoints(loggedInUser, quizScore * 10); // Award 10 points per correct answer
+                updateUserSkill(loggedInUser, currentQuiz.category, quizScore); // Update skill based on quiz score
+                showConfetti();
+                showCustomAlert(`Quiz ${currentQuiz.title} completed! You earned ${quizScore * 10} points!`);
+
+                // Disable submit button after quiz completion
+                document.querySelector('#quiz-area button[onclick="submitCurrentQuiz()"]').disabled = true;
+
+                // Update dashboard elements
+                updateDashboardSummary();
+                loadUserStats(loggedInUser); // Update stats tab
+                updateLeaderboard();
+                renderSkillMatrix(loggedInUser); // Re-render skill matrix
+            }
+        }
+
+        // --- CTF Challenges ---
+        function loadCTF(ctfId) {
+            currentCTF = CTF_CHALLENGES[ctfId];
+
+            if (!currentCTF) {
+                showFeedback('ctf-feedback', 'CTF challenge not found!', false);
+                return;
+            }
+
+            document.getElementById('ctf-area').style.display = 'block';
+            document.getElementById('current-ctf-title').textContent = currentCTF.title;
+            document.getElementById('ctf-scenario-text').textContent = currentCTF.scenario;
+            document.getElementById('ctf-feedback').innerHTML = ''; // Clear previous feedback
+
+            renderCTFQuestion();
+        }
+
+        function renderCTFQuestion() {
+            const ctfForm = document.getElementById('current-ctf-form');
+            ctfForm.innerHTML = ''; // Clear previous question/options
+
+            const q = currentCTF.questions[0]; // Assuming one question per CTF
+            if (!q) return;
+
+            const questionDiv = document.createElement('div');
+            questionDiv.classList.add('ctf-question');
+            questionDiv.innerHTML = `<p><strong>${q.question_text}</strong></p>`;
+
+            for (const key in q.options) {
+                const label = document.createElement('label');
+                label.innerHTML = `<input type="radio" name="ctf-q0" value="${key}"> ${key}) ${q.options[key]}`;
+                questionDiv.appendChild(label);
+            }
+            ctfForm.appendChild(questionDiv);
+
+            // Re-enable button and inputs if challenge is reloaded
+            document.querySelector('#ctf-area button[onclick="submitCurrentCTF()"]').disabled = false;
+            ctfForm.querySelectorAll('input').forEach(input => input.disabled = false);
+        }
+
+        function submitCurrentCTF() {
+            if (!currentCTF) return;
+
+            const selectedOption = document.querySelector(`input[name="ctf-q0"]:checked`);
+            const ctfFeedback = document.getElementById('ctf-feedback');
+
+            if (!selectedOption) {
+                showFeedback('ctf-feedback', 'Please select an answer!', false);
+                return;
+            }
+
+            const q = currentCTF.questions[0];
+            const ctfUserAnswer = selectedOption.value;
+            const isCorrect = (ctfUserAnswer === q.correct);
+
+            ctfFeedback.innerHTML = ''; // Clear feedback before displaying new one
+
+            if (isCorrect) {
+                ctfFeedback.innerHTML = `<p class="correct-answer-text">🎉 Correct! You identified the red flag!</p><p>${q.explanation}</p>`;
+                ctfFeedback.style.color = 'var(--success-color)';
+                const loggedInUser = localStorage.getItem('loggedInUser');
+                addUserPoints(loggedInUser, 75);
+                updateUserSkill(loggedInUser, currentCTF.category, 15); // Increase skill for CTF category
+                let userCTFData = JSON.parse(localStorage.getItem(`ctfData_${loggedInUser}`)) || { ctfsCompleted: 0 };
+                userCTFData.ctfsCompleted++;
+                localStorage.setItem(`ctfData_${loggedInUser}`, JSON.stringify(userCTFData));
+                showConfetti();
+                showCustomAlert(`CTF Challenge completed! You earned 75 points!`);
+            } else {
+                ctfFeedback.innerHTML = `<p class="incorrect-answer-text">❌ Incorrect. Try to understand why:</p><p>${q.explanation}</p>`;
+                ctfFeedback.style.color = 'var(--error-color)';
+                showCustomAlert(`CTF Challenge completed. Review the explanation to learn more.`);
+            }
+
+            // Disable further interaction for this challenge after submission
+            const ctfForm = document.getElementById('current-ctf-form');
+            ctfForm.querySelectorAll('input').forEach(input => input.disabled = true);
+            document.querySelector('#ctf-area button[onclick="submitCurrentCTF()"]').disabled = true;
+
+            updateDashboardSummary();
+            loadUserStats(loggedInUser); // Update stats tab
+            updateLeaderboard();
+            renderSkillMatrix(loggedInUser); // Re-render skill matrix
+        }
+
+
+        // --- Leaderboard ---
+        function updateLeaderboard() {
+            const loggedInUser = localStorage.getItem('loggedInUser');
+            const leaderboardBody = document.getElementById('leaderboard-body');
+            if (!leaderboardBody) return;
+
+            // Use a Map to easily handle updates and ensure uniqueness by username
+            let allUsersMap = new Map();
+
+            // 1. Add default users to the map
+            DEFAULT_LEADERBOARD_USERS.forEach(defaultUser => {
+                allUsersMap.set(defaultUser.username, { ...defaultUser }); // Clone to avoid modifying original
+            });
+
+            // 2. Iterate through localStorage to find actual users and update/add them
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                if (key.startsWith('userProfile_')) {
+                    const username = key.replace('userProfile_', '');
+
+                    const userProfile = JSON.parse(localStorage.getItem(key));
+                    const userPoints = getUserPoints(username);
+                    const userQuizData = JSON.parse(localStorage.getItem(`quizData_${username}`)) || { totalScore: 0, quizzesCompleted: 0 };
+                    const moduleProgress = JSON.parse(localStorage.getItem(`moduleProgress_${username}`)) || {};
+                    const userCTFData = JSON.parse(localStorage.getItem(`ctfData_${username}`)) || { ctfsCompleted: 0 };
+
+                    let modulesCompletedCount = 0;
+                    for (const moduleId in moduleProgress) {
+                        if (moduleProgress[moduleId].completed && moduleProgress[moduleId].passedAssessment) {
+                            modulesCompletedCount++;
+                        }
+                    }
+
+                    const currentUserData = {
+                        username: username,
+                        avatar: userProfile.avatar,
+                        points: userPoints,
+                        quizzesCompleted: userQuizData.quizzesCompleted,
+                        modulesCompleted: modulesCompletedCount,
+                        ctfsCompleted: userCTFData.ctfsCompleted
+                    };
+
+                    // If user exists in map (either default or already added), update their data
+                    // Otherwise, add them as a new entry
+                    allUsersMap.set(username, currentUserData);
+                }
+            }
+
+            // Convert map values to an array for sorting
+            let allUsersData = Array.from(allUsersMap.values());
+
+            // Sort by points (descending)
+            allUsersData.sort((a, b) => b.points - a.points);
+
+            leaderboardBody.innerHTML = ''; // Clear existing rows
+
+            allUsersData.forEach((user, index) => {
+                const row = leaderboardBody.insertRow();
+                // Add data-label attributes for mobile responsiveness
+                row.insertCell().textContent = index + 1; // Rank
+                const medalCell = row.insertCell();
+                if (index === 0) medalCell.innerHTML = '<i class="fas fa-medal gold-medal"></i>';
+                else if (index === 1) medalCell.innerHTML = '<i class="fas fa-medal silver-medal"></i>';
+                else if (index === 2) medalCell.innerHTML = '<i class="fas fa-medal bronze-medal"></i>';
+                else medalCell.textContent = ''; // No medal
+                row.insertCell().innerHTML = `<img src="${user.avatar}" alt="${user.username}" class="leaderboard-avatar">`; // Avatar
+                row.insertCell().textContent = user.username; // User
+                row.insertCell().textContent = user.points; // Points
+                row.insertCell().textContent = user.quizzesCompleted; // Quizzes
+                row.insertCell().textContent = user.modulesCompleted; // Modules
+                row.insertCell().textContent = user.ctfsCompleted; // CTFs
+
+                // Add data-label attributes after cells are created
+                row.cells[0].setAttribute('data-label', 'Rank:');
+                row.cells[1].setAttribute('data-label', 'Medal:');
+                row.cells[2].setAttribute('data-label', 'Avatar:');
+                row.cells[3].setAttribute('data-label', 'User:');
+                row.cells[4].setAttribute('data-label', 'Points:');
+                row.cells[5].setAttribute('data-label', 'Quizzes:');
+                row.cells[6].setAttribute('data-label', 'Modules:');
+                row.cells[7].setAttribute('data-label', 'CTFs:');
+
+
+                if (user.username === loggedInUser) {
+                    row.classList.add('current-user-row');
+                }
+            });
+        }
+
+        // --- Dashboard Summary Update ---
+        function updateDashboardSummary() {
+            const loggedInUser = localStorage.getItem('loggedInUser');
+            if (!loggedInUser) return;
+
+            // Update Checklist Status
+            const checklistForm = document.getElementById('hygiene-form');
+            if (checklistForm) { // Only attempt if form exists on page
+                const checklistItems = checklistForm.querySelectorAll('input[type="checkbox"]');
+                let completedCount = 0;
+                if (checklistItems.length > 0) {
+                    checklistItems.forEach(item => {
+                        if (item.checked) {
+                            completedCount++;
+                        }
+                    });
+                    const totalItems = checklistItems.length;
+                    const checklistStatusText = document.getElementById('dashboard-checklist-status');
+                    if (checklistStatusText) {
+                        if (completedCount === totalItems) {
+                            checklistStatusText.textContent = 'All tasks completed today! 🎉';
+                        } else if (completedCount > 0) {
+                            checklistStatusText.textContent = `${completedCount} of ${totalItems} tasks completed.`;
+                        } else {
+                            checklistStatusText.textContent = 'Not started today.';
+                        }
+                    }
+                }
+            }
+
+
+            // Update Quiz Progress
+            const userQuizData = JSON.parse(localStorage.getItem(`quizData_${loggedInUser}`)) || { totalScore: 0, quizzesCompleted: 0 };
+            const dashboardQuizProgress = document.getElementById('dashboard-quiz-progress');
+            if (dashboardQuizProgress) {
+                if (userQuizData.quizzesCompleted > 0) {
+                    dashboardQuizProgress.textContent = `Completed ${userQuizData.quizzesCompleted} quiz(zes). Total score: ${userQuizData.totalScore}`;
+                } else {
+                    dashboardQuizProgress.textContent = 'No quizzes completed yet.';
+                }
+            }
+
+            // Update Most Tackled Categories (Simplified for client-side)
+            const userSkillData = JSON.parse(localStorage.getItem(`userSkill_${loggedInUser}`)) || {};
+            const mostTackledDisplay = document.getElementById('most-tackled-display');
+            if (mostTackledDisplay) {
+                let sortedSkills = Object.entries(userSkillData).sort(([,a],[,b]) => b - a);
+                mostTackledDisplay.innerHTML = '';
+                if (sortedSkills.length > 0) {
+                    sortedSkills.slice(0, 3).forEach(([category, score]) => { // Show top 3
+                        const badge = document.createElement('span');
+                        badge.classList.add('badge');
+                        badge.textContent = category;
+                        mostTackledDisplay.appendChild(badge);
+                    });
+                } else {
+                    mostTackledDisplay.innerHTML = '<span class="badge">No activity yet</span>';
+                }
+            }
+        }
+
+        // --- User Stats ---
+        function loadUserStats(username) {
+            const totalPoints = getUserPoints(username);
+            const userQuizData = JSON.parse(localStorage.getItem(`quizData_${username}`)) || { totalScore: 0, quizzesCompleted: 0 };
+            const moduleProgress = JSON.parse(localStorage.getItem(`moduleProgress_${username}`)) || {};
+            const userCTFData = JSON.parse(localStorage.getItem(`ctfData_${username}`)) || { ctfsCompleted: 0 };
+
+            let modulesCompletedCount = 0;
+            for (const moduleId in moduleProgress) {
+                if (moduleProgress[moduleId].completed && moduleProgress[moduleId].passedAssessment) {
+                    modulesCompletedCount++;
+                }
+            }
+
+            const avgQuizScore = userQuizData.quizzesCompleted > 0 ?
+                ((userQuizData.totalScore / (userQuizData.quizzesCompleted * 10)) * 100).toFixed(0) : 0; // Assuming 10 questions per quiz
+
+            // Ensure elements exist before updating textContent
+            if (document.getElementById('stats-total-points')) document.getElementById('stats-total-points').textContent = totalPoints;
+            if (document.getElementById('stats-quizzes-completed')) document.getElementById('stats-quizzes-completed').textContent = userQuizData.quizzesCompleted;
+            if (document.getElementById('stats-modules-completed')) document.getElementById('stats-modules-completed').textContent = modulesCompletedCount;
+            if (document.getElementById('stats-ctfs-completed')) document.getElementById('stats-ctfs-completed').textContent = userCTFData.ctfsCompleted;
+            if (document.getElementById('stats-avg-quiz-score')) document.getElementById('stats-avg-quiz-score').textContent = `${avgQuizScore}%`;
+        }
+
+        // --- Skill Matrix (Chart.js) ---
+        function getUserSkillData(username) {
+            return JSON.parse(localStorage.getItem(`userSkill_${username}`)) || {};
+        }
+
+        function updateUserSkill(username, category, points) {
+            if (!category || !SKILL_CATEGORIES.includes(category)) {
+                console.warn(`Attempted to update skill for unknown category: ${category}`);
+                return;
+            }
+
+            let userSkillData = getUserSkillData(username);
+            userSkillData[category] = (userSkillData[category] || 0) + points;
+            localStorage.setItem(`userSkill_${username}`, JSON.stringify(userSkillData));
+        }
+
+        function renderSkillMatrix(username) {
+            const ctx = document.getElementById('skillMatrixChart');
+            if (!ctx) return; // Ensure canvas element exists
+
+            const userSkillData = getUserSkillData(username);
+            const dataPoints = SKILL_CATEGORIES.map(category => userSkillData[category] || 0);
+
+            const isDarkMode = document.body.classList.contains('dark-mode');
+            const fontColor = isDarkMode ? '#e2e8f0' : '#333';
+            const gridColor = isDarkMode ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)';
+            const pointBackgroundColor = isDarkMode ? '#63b3ed' : '#3498db';
+            const pointBorderColor = isDarkMode ? '#4299e1' : '#0a3d62';
+            const backgroundColor = isDarkMode ? 'rgba(99, 179, 237, 0.2)' : 'rgba(52, 152, 219, 0.2)';
+            const borderColor = isDarkMode ? '#63b3ed' : '#3498db';
+
+            if (skillMatrixChartInstance) {
+                skillMatrixChartInstance.destroy();
+            }
+
+            skillMatrixChartInstance = new Chart(ctx, {
+                type: 'radar',
+                data: {
+                    labels: SKILL_CATEGORIES,
+                    datasets: [{
+                        label: 'Your Skill Level',
+                        data: dataPoints,
+                        backgroundColor: backgroundColor,
+                        borderColor: borderColor,
+                        pointBackgroundColor: pointBackgroundColor,
+                        pointBorderColor: pointBorderColor,
+                        pointHoverBackgroundColor: '#fff',
+                        pointHoverBorderColor: borderColor,
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        r: {
+                            angleLines: {
+                                color: gridColor
+                            },
+                            grid: {
+                                color: gridColor
+                            },
+                            pointLabels: {
+                                color: fontColor,
+                                font: {
+                                    size: 14
+                                }
+                            },
+                            ticks: {
+                                beginAtZero: true,
+                                color: fontColor,
+                                backdropColor: 'transparent',
+                                font: {
+                                    size: 12
+                                },
+                                stepSize: 50,
+                                maxTicksLimit: 5
+                            },
+                            suggestedMin: 0,
+                            suggestedMax: 200 // Max skill points for visualization
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            labels: {
+                                color: fontColor,
+                                font: {
+                                    size: 14
+                                }
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return context.dataset.label + ': ' + context.raw + ' points';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function updateSkillMatrixChartTheme() {
+            if (skillMatrixChartInstance) {
+                const isDarkMode = document.body.classList.contains('dark-mode');
+                const fontColor = isDarkMode ? '#e2e8f0' : '#333';
+                const gridColor = isDarkMode ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)';
+                const pointBackgroundColor = isDarkMode ? '#63b3ed' : '#3498db';
+                const pointBorderColor = isDarkMode ? '#4299e1' : '#0a3d62';
+                const backgroundColor = isDarkMode ? 'rgba(99, 179, 237, 0.2)' : 'rgba(52, 152, 219, 0.2)';
+                const borderColor = isDarkMode ? '#63b3ed' : '#3498db';
+
+                skillMatrixChartInstance.options.scales.r.pointLabels.color = fontColor;
+                skillMatrixChartInstance.options.scales.r.grid.color = gridColor;
+                skillMatrixChartInstance.options.scales.r.angleLines.color = gridColor;
+                skillMatrixChartInstance.options.scales.r.ticks.color = fontColor;
+                skillMatrixChartInstance.options.plugins.legend.labels.color = fontColor;
+
+                skillMatrixChartInstance.data.datasets[0].backgroundColor = backgroundColor;
+                skillMatrixChartInstance.data.datasets[0].borderColor = borderColor;
+                skillMatrixChartInstance.data.datasets[0].pointBackgroundColor = pointBackgroundColor;
+                skillMatrixChartInstance.data.datasets[0].pointBorderColor = pointBorderColor;
+                skillMatrixChartInstance.data.datasets[0].pointHoverBorderColor = borderColor;
+
+                skillMatrixChartInstance.update();
+            }
+        }
+
+
+        // --- Logout ---
+        function logout() {
+            clearInterval(sessionTimerInterval); // Stop the session timer
+            const modal = document.createElement('div');
+            modal.classList.add('custom-modal');
+            modal.innerHTML = `
+                <div class="modal-content">
+                    <h3>Confirm Logout</h3>
+                    <p>Are you sure you want to log out 😭</p>
+                    <div class="modal-buttons">
+                        <button id="confirm-logout-btn" class="confirm-btn">Yes</button>
+                        <button id="cancel-logout-btn" class="cancel-btn">Cancel</button>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(modal);
+
+            document.getElementById('confirm-logout-btn').onclick = () => {
+                localStorage.removeItem('loggedInUser');
+                // No need to clear other user-specific data here, as it persists for that user
+                // and will be loaded if they log in again.
+                document.body.removeChild(modal); // Remove modal before showing login
+                showSection('login-section');
+            };
+
+            document.getElementById('cancel-logout-btn').onclick = () => {
+                document.body.removeChild(modal);
+            };
+        }
+
+        // --- Custom Alert/Confirm (replaces native alert/confirm) ---
+        function showCustomAlert(message) {
+            const modal = document.createElement('div');
+            modal.classList.add('custom-modal');
+            modal.innerHTML = `
+                <div class="modal-content">
+                    <h3>Notification</h3>
+                    <p>${message}</p>
+                    <div class="modal-buttons">
+                        <button id="custom-alert-ok-btn" class="confirm-btn">OK</button>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(modal);
+
+            document.getElementById('custom-alert-ok-btn').onclick = () => {
+                document.body.removeChild(modal);
+            };
+        }
+
+
+        // --- Confetti Animation ---
+        const confettiCanvas = document.getElementById('confetti-canvas');
+        const confettiCtx = confettiCanvas ? confettiCanvas.getContext('2d') : null;
+        let confettiPieces = [];
+
+        function resizeConfettiCanvas() {
+            if (confettiCanvas) {
+                confettiCanvas.width = window.innerWidth;
+                confettiCanvas.height = window.innerHeight;
+            }
+        }
+
+        function createConfettiPiece() {
+            return {
+                x: Math.random() * confettiCanvas.width,
+                y: Math.random() * confettiCanvas.height - confettiCanvas.height,
+                size: Math.random() * 10 + 5,
+                color: `hsl(${Math.random() * 360}, 100%, 70%)`,
+                speed: Math.random() * 3 + 2,
+                rotation: Math.random() * 360,
+                rotationSpeed: Math.random() * 10 - 5
+            };
+        }
+
+        function updateConfetti() {
+            if (!confettiCtx) return;
+
+            confettiCtx.clearRect(0, 0, confettiCanvas.width, confettiCanvas.height);
+            for (let i = 0; i < confettiPieces.length; i++) {
+                let p = confettiPieces[i];
+                p.y += p.speed;
+                p.rotation += p.rotationSpeed;
+
+                confettiCtx.save();
+                confettiCtx.translate(p.x + p.size / 2, p.y + p.size / 2);
+                confettiCtx.rotate(p.rotation * Math.PI / 180);
+                confettiCtx.fillStyle = p.color;
+                confettiCtx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size);
+                confettiCtx.restore();
+
+                if (p.y > confettiCanvas.height) {
+                    confettiPieces.splice(i, 1);
+                    i--;
+                }
+            }
+            requestAnimationFrame(updateConfetti);
+        }
+
+        function showConfetti() {
+            if (!confettiCanvas || !confettiCtx) return;
+
+            confettiPieces = [];
+            for (let i = 0; i < 100; i++) {
+                confettiPieces.push(createConfettiPiece());
+            }
+            resizeConfettiCanvas();
+            confettiCanvas.style.display = 'block';
+            updateConfetti();
+
+            setTimeout(() => {
+                confettiCanvas.style.display = 'none';
+                confettiPieces = [];
+            }, 3000);
+        }
+    </script>
+</body>
+</html>
